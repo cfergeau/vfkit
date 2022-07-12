@@ -29,7 +29,7 @@ jobs:
         run: make
       - name: Test
         run: make test
-      - name: vet
+      - name: Run 'go vet'
         run: go vet ./...
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
