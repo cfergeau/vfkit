@@ -33,6 +33,16 @@ jobs:
         run: go vet ./...
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
+      - name: "Import code signing certificate"
+        uses: devbotsxyz/import-signing-certificate@main
+        with:
+          certificate-data: ${{ secrets.MACOS_APPLICATION_CERTIFICATE_DATA }}
+          certificate-passphrase: ${{ secrets.MACOS_APPLICATION_CERTIFICATE_PASSPHRASE }}
+          keychain-password: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+          keychain-name: "vfkit-keychain"
+      - name: "Sign executable"
+        run: |
+          /usr/bin/codesign --force -s 'Developer ID Application: Christophe Fergeau (GSP9DR7D3R)' ./vfkit -v
       - name: Upload vfkit artifact
         uses: actions/upload-artifact@v3
         with:
