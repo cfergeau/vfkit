@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - "main"
+      - "codesign"
     tags:
       - "*"
   pull_request: {}
