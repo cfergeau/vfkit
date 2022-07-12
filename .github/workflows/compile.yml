@@ -48,3 +48,8 @@ jobs:
         with:
           name: vfkit Universal Binary (${{ matrix.os }})
           path: "./out/vfkit"
+      - name: Upload signed vfkit executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: signed macOS Intel vfkit executable
+          path: "./vfkit"
