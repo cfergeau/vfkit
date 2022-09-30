@@ -207,6 +207,7 @@ func runVirtualMachine(vmConfig *config.VirtualMachine, vm *vz.VirtualMachine) e
 			}
 			break
 		}
+		// FIXME: ignoring errors, is this ok?
 	}
 
 	return <-errCh
