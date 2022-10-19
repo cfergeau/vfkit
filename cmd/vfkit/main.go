@@ -150,10 +150,24 @@ func runVirtualMachine(vmConfig *config.VirtualMachine, vm *vz.VirtualMachine) e
 		return err
 	}
 
-	err = waitForVMState(vm, vz.VirtualMachineStateRunning)
-	if err != nil {
-		return err
+loop:
+	for {
+		newState := <-vm.StateChangedNotify()
+		switch newState {
+		case vz.VirtualMachineStateRunning:
+			break loop
+		case vz.VirtualMachineStateStarting, vz.VirtualMachineStateResuming:
+			log.Debugf("virtual machine starting up")
+			continue
+		case vz.VirtualMachineStateError:
+			log.Warnf("virtual machine failed to start")
+			return errors.New("virtual machine failed to start")
+		default:
+			log.Warnf("unexpected virtual machine state: %s", newState)
+			return fmt.Errorf("unexpected virtual machine state: %s", newState)
+		}
 	}
+
 	log.Infof("virtual machine is running")
 
 	for _, vsock := range vmConfig.VirtioVsockDevices() {
@@ -183,17 +197,16 @@ func runVirtualMachine(vmConfig *config.VirtualMachine, vm *vz.VirtualMachine) e
 	errCh := make(chan error, 1)
 	go func() {
 		for {
-			err := waitForVMState(vm, vz.VirtualMachineStateStopped)
-			if err == nil {
+		select {
+		case newState := <-vm.StateChangedNotify():
+			log.Debugf("StateChange notification: %s", newState)
+			switch newState {
+			case vz.VirtualMachineStateStopped, vz.VirtualMachineStatePaused:
 				log.Infof("VM is stopped")
 				errCh <- nil
-				return
+			case vz.VirtualMachineStateError:
+				errCh <- fmt.Errorf("hypervisor virtualization error")
 			}
-			if !errors.Is(err, errVMStateTimeout) {
-				errCh <- fmt.Errorf("virtualization error: %v", err)
-				return
-			}
-			// errVMStateTimeout -> keep looping
 		}
 	}()
 
@@ -207,7 +220,6 @@ func runVirtualMachine(vmConfig *config.VirtualMachine, vm *vz.VirtualMachine) e
 			}
 			break
 		}
-		// FIXME: ignoring errors, is this ok?
 	}
 
 	return <-errCh
