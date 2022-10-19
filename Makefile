@@ -1,4 +1,4 @@
-.PHONY: all build clean test
+.PHONY: all build clean test asan
 
 CGO_CFLAGS=-mmacosx-version-min=11.0
 
@@ -17,11 +17,15 @@ clean:
 
 out/vfkit-amd64 out/vfkit-arm64: out/vfkit-%: force-build
 	@mkdir -p $(@D)
-	CGO_ENABLED=1 CGO_CFLAGS=$(CGO_CFLAGS) GOOS=darwin GOARCH=$* go build -o $@ ./cmd/vfkit
+	CGO_ENABLED=1 CGO_CFLAGS=$(CGO_CFLAGS) CGO_LDFLAGS=$(CGO_LDFLAGS) GOOS=darwin GOARCH=$* go build -o $@ ./cmd/vfkit
 	codesign --entitlements vf.entitlements -s - $@
 
 out/vfkit: out/vfkit-amd64 out/vfkit-arm64
 	cd $(@D) && lipo -create $(^F) -output $(@F)
+
+asan: CGO_CFLAGS:="-fsanitize=address $(CGO_CFLAGS)"
+asan: CGO_LDFLAGS:="-fsanitize=address"
+asan: build
 
 # the go compiler is doing a good job at not rebuilding unchanged files
 # this phony target ensures out/vfkit-* are always considered out of date
