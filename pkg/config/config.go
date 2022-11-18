@@ -142,6 +142,8 @@ func (vm *VirtualMachine) VirtioVsockDevices() []*VirtioVsock {
 
 // AddDevice adds a dev to vm. This device can be created with one of the
 // VirtioXXXNew methods.
+// FIXME: This also accepts any VMComponent device, go typechecking does not behave exactly as I expected ;)
+// as long as a type implement the interface methods, it can be implicitly converted to that interface
 func (vm *VirtualMachine) AddDevice(dev VirtioDevice) error {
 	vm.Devices = append(vm.Devices, dev)
 
