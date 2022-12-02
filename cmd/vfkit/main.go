@@ -20,7 +20,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -87,13 +86,10 @@ func newVMConfiguration(opts *cmdline.Options) (*config.VirtualMachine, error) {
 }
 
 func waitForVMState(vm *vz.VirtualMachine, state vz.VirtualMachineState) error {
-	signalCh := make(chan os.Signal, 1)
-	signal.Notify(signalCh, syscall.SIGPIPE)
+	signal.Ignore(syscall.SIGPIPE)
 
 	for {
 		select {
-		case s := <-signalCh:
-			log.Debugf("ignoring signal %v", s)
 		case newState := <-vm.StateChangedNotify():
 			if newState == state {
 				return nil
