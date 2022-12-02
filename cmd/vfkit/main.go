@@ -20,6 +20,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -85,11 +86,24 @@ func newVMConfiguration(opts *cmdline.Options) (*config.VirtualMachine, error) {
 	return vmConfig, nil
 }
 
-func waitForVMState(vm *vz.VirtualMachine, state vz.VirtualMachineState) error {
+func waitForVMState(vm *vz.VirtualMachine, state vz.VirtualMachineState, timesync *config.TimeSync) error {
 	signal.Ignore(syscall.SIGPIPE)
+
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGUSR1)
 
 	for {
 		select {
+		case s := <-signalCh:
+			log.Debugf("caught signal %v, syncing guest time", s)
+			if timesync == nil {
+				break
+			}
+			ts := newTimeSyncer(vm, timesync.VsockPort())
+			defer ts.Close()
+			if err := ts.syncGuestTime(); err != nil {
+				log.Warnf("failed to sync guest time: %v", err)
+			}
 		case newState := <-vm.StateChangedNotify():
 			if newState == state {
 				return nil
@@ -119,7 +133,7 @@ func runVirtualMachine(vmConfig *config.VirtualMachine) error {
 		return err
 	}
 
-	err = waitForVMState(vm, vz.VirtualMachineStateRunning)
+	err = waitForVMState(vm, vz.VirtualMachineStateRunning, nil)
 	if err != nil {
 		return err
 	}
@@ -149,7 +163,7 @@ func runVirtualMachine(vmConfig *config.VirtualMachine) error {
 
 	log.Infof("waiting for VM to stop")
 	for {
-		err := waitForVMState(vm, vz.VirtualMachineStateStopped)
+		err := waitForVMState(vm, vz.VirtualMachineStateStopped, vmConfig.TimeSync())
 		if err == nil {
 			log.Infof("VM is stopped")
 			break
