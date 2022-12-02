@@ -13,12 +13,54 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func syncGuestTime(conn net.Conn) error {
+type timeSyncer struct {
+	vsockConn net.Conn
+	vm        *vz.VirtualMachine
+	vsockPort uint
+}
+
+func newTimeSyncer(vm *vz.VirtualMachine, vsockPort uint) *timeSyncer {
+	return &timeSyncer{
+		vm:        vm,
+		vsockPort: vsockPort,
+	}
+}
+
+func (ts *timeSyncer) conn() (net.Conn, error) {
+	if ts.vm == nil || ts.vsockPort == 0 {
+		return nil, fmt.Errorf("timeSyncer is in an invalid state")
+	}
+
+	if ts.vsockConn != nil {
+		return ts.vsockConn, nil
+	}
+	vsockConn, err := vf.ConnectVsockSync(ts.vm, ts.vsockPort)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to vsock port %d: %v", ts.vsockPort, err)
+	}
+	ts.vsockConn = vsockConn
+
+	return ts.vsockConn, nil
+}
+
+func (ts *timeSyncer) Close() error {
+	if ts.vsockConn != nil {
+		return ts.vsockConn.Close()
+	}
+
+	return nil
+}
+
+func (ts *timeSyncer) syncGuestTime() error {
+	conn, err := ts.conn()
+	if err != nil {
+		return err
+	}
 	qemugaCmdTemplate := `{"execute": "guest-set-time", "arguments":{"time": %d}}` + "\n"
 	qemugaCmd := fmt.Sprintf(qemugaCmdTemplate, time.Now().UnixNano())
 
 	log.Debugf("sending %s to qemu-guest-agent", qemugaCmd)
-	_, err := conn.Write([]byte(qemugaCmd))
+	_, err = conn.Write([]byte(qemugaCmd))
 	if err != nil {
 		return err
 	}
@@ -33,15 +75,7 @@ func syncGuestTime(conn net.Conn) error {
 
 	return nil
 }
-
-func watchWakeupNotifications(vm *vz.VirtualMachine, vsockPort uint) {
-	var vsockConn net.Conn
-	defer func() {
-		if vsockConn != nil {
-			_ = vsockConn.Close()
-		}
-	}()
-
+func (ts *timeSyncer) watchWakeupNotifications() {
 	sleepNotifierCh := sleepnotifier.GetInstance().Start()
 	for {
 		select {
@@ -49,21 +83,12 @@ func watchWakeupNotifications(vm *vz.VirtualMachine, vsockPort uint) {
 			log.Debugf("Sleep notification: %s", activity)
 			if activity.Type == sleepnotifier.Awake {
 				log.Infof("machine awake")
-				if vsockConn == nil {
-					var err error
-					vsockConn, err = vf.ConnectVsockSync(vm, vsockPort)
-					if err != nil {
-						log.Debugf("error connecting to vsock port %d: %v", vsockPort, err)
-						break
-					}
-				}
-				if err := syncGuestTime(vsockConn); err != nil {
+				if err := ts.syncGuestTime(); err != nil {
 					log.Debugf("error syncing guest time: %v", err)
 				}
 			}
 		}
 	}
-
 }
 
 func setupGuestTimeSync(vm *vz.VirtualMachine, timesync *config.TimeSync) error {
@@ -73,7 +98,8 @@ func setupGuestTimeSync(vm *vz.VirtualMachine, timesync *config.TimeSync) error 
 
 	log.Infof("Setting up host/guest time synchronization")
 
-	go watchWakeupNotifications(vm, timesync.VsockPort())
+	timeSyncer := newTimeSyncer(vm, timesync.VsockPort())
+	go timeSyncer.watchWakeupNotifications()
 
 	return nil
 }
