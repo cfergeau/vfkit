@@ -18,9 +18,13 @@ limitations under the License.
 
 package main
 
+/*
+#include <stdlib.h>
+*/
+import "C"
 import (
 	"fmt"
 )
 func main() {
-	fmt.Println("compilation test")
+	fmt.Println(int(C.random()))
 }
