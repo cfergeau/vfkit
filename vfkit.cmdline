@@ -1,0 +1,40 @@
+rm ~/.crc/connect.sock
+rm ~/.crc/listen.sock
+#./out/vfkit --cpus 2 --memory 2048 --kernel /Users/teuf/.crc/cache/crc_podman_vfkit_4.1.1_arm64/vmlinuz-5.18.11-200.fc36.aarch64 --initrd /Users/teuf/.crc/cache/crc_podman_vfkit_4.1.1_arm64/initramfs-5.18.11-200.fc36.aarch64.img --kernel-cmdline "console=hvc0 BOOT_IMAGE=(hd0,gpt3)/ostree/fedora-coreos-7dcd83a9a787ee7ffb2723a00cd36f53f2d3ed0fe55750385317f9ad0c55e71f/vmlinuz-5.18.11-200.fc36.aarch64 mitigations=auto,nosmt ignition.platform.id=qemu ostree=/ostree/boot.1/fedora-coreos/7dcd83a9a787ee7ffb2723a00cd36f53f2d3ed0fe55750385317f9ad0c55e71f/0 root=UUID=0c3b76ef-82fb-49f7-bc78-b77a4ab2dedd rw rootflags=prjquota boot=UUID=279da853-f4f0-4da1-a9f7-6e63b9e3e911" --device virtio-serial,logFilePath=/tmp/vfkit.log --device virtio-rng --device virtio-blk,path=/Users/teuf/.crc/cache/crc_podman_vfkit_4.1.1_arm64/qemuga.img --device virtio-vsock,connect,port=1024,socketURL=/Users/teuf/.crc/tap.sock --device virtio-net,nat,mac=72:20:43:d4:38:62
+#./out/vfkit --cpus 2 --memory 2048 --kernel /Users/teuf/.crc/cache/crc_podman_vfkit_4.1.1_arm64/vmlinuz-5.18.11-200.fc36.aarch64 --initrd /Users/teuf/.crc/cache/crc_podman_vfkit_4.1.1_arm64/initramfs-5.18.11-200.fc36.aarch64.img --kernel-cmdline "console=hvc0 BOOT_IMAGE=(hd0,gpt3)/ostree/fedora-coreos-7dcd83a9a787ee7ffb2723a00cd36f53f2d3ed0fe55750385317f9ad0c55e71f/vmlinuz-5.18.11-200.fc36.aarch64 mitigations=auto,nosmt ignition.platform.id=qemu ostree=/ostree/boot.1/fedora-coreos/7dcd83a9a787ee7ffb2723a00cd36f53f2d3ed0fe55750385317f9ad0c55e71f/0 root=UUID=0c3b76ef-82fb-49f7-bc78-b77a4ab2dedd rw rootflags=prjquota boot=UUID=279da853-f4f0-4da1-a9f7-6e63b9e3e911" --device virtio-serial,logFilePath=/tmp/vfkit.log --device virtio-rng --device virtio-blk,path=/Users/teuf/.crc/cache/crc_podman_vfkit_4.1.1_arm64/qemuga.img --device virtio-vsock,port=1024,socketURL=/Users/teuf/.crc/tap.sock --device virtio-net,nat,mac=72:20:43:d4:38:62
+
+
+#~/go/bin/dlv exec ./out/vfkit-arm64 -- --cpus 2 --memory 2048 \
+#~/go/bin/dlv exec ./out/vfkit-arm64 -- --cpus 2 --memory 2048 \
+
+# New
+#./out/vfkit --cpus 2 --memory 2048 \
+#    --bootloader linux,kernel=/Users/teuf/.crc/cache/crc_podman_vfkit_4.2.0_arm64/vmlinuz-5.18.18-200.fc36.aarch64,initrd=/Users/teuf/.crc/cache/crc_podman_vfkit_4.2.0_arm64/initramfs-5.18.18-200.fc36.aarch64.img,cmdline="\"console=hvc0 BOOT_IMAGE=(hd0,gpt3)/ostree/fedora-coreos-8edf9753152209bad4dde8faf34b8484000abe010476136b4dba35f7ad83e9e5/vmlinuz-5.18.18-200.fc36.aarch64 mitigations=auto,nosmt ignition.platform.id=qemu ostree=/ostree/boot.1/fedora-coreos/8edf9753152209bad4dde8faf34b8484000abe010476136b4dba35f7ad83e9e5/0 root=UUID=164b4fc3-dc5a-40ea-a40b-c689a7bf41cf rw rootflags=prjquota boot=UUID=e49b7a72-095a-4ae8-9f36-91dd8d4e464a\"" \
+
+# EFI
+#./out/vfkit --cpus 2 --memory 2048 \
+# --bootloader efi,variable-store=/Users/teuf/efi-variable-store,create \
+
+# Legacy
+#./out/vfkit --cpus 2 --memory 2048 \
+#    --kernel /Users/teuf/.crc/cache/crc_podman_vfkit_4.2.0_arm64/vmlinuz-5.18.18-200.fc36.aarch64 \
+#    --initrd /Users/teuf/.crc/cache/crc_podman_vfkit_4.2.0_arm64/initramfs-5.18.18-200.fc36.aarch64.img \
+#    --kernel-cmdline "console=hvc0 BOOT_IMAGE=(hd0,gpt3)/ostree/fedora-coreos-8edf9753152209bad4dde8faf34b8484000abe010476136b4dba35f7ad83e9e5/vmlinuz-5.18.18-200.fc36.aarch64 mitigations=auto,nosmt ignition.platform.id=qemu ostree=/ostree/boot.1/fedora-coreos/8edf9753152209bad4dde8faf34b8484000abe010476136b4dba35f7ad83e9e5/0 root=UUID=164b4fc3-dc5a-40ea-a40b-c689a7bf41cf rw rootflags=prjquota boot=UUID=e49b7a72-095a-4ae8-9f36-91dd8d4e464a" \
+
+# for testing --device virtio-net,unixSocketPath=/tmp/network.sock,mac=72:20:43:d4:38:62 :
+# rm  -f /tmp/network.sock && socat  -x UNIX-RECVFROM:/tmp/network.sock,fork STDIO
+#
+#    --device virtio-net,nat,mac=72:20:43:d4:38:62 \
+./out/vfkit --cpus 2 --memory 2048 \
+    --bootloader efi,variable-store=/Users/teuf/efi-variable-store,create \
+    --device virtio-serial,stdio \
+    --device virtio-fs,sharedDir=/Users/teuf,mountTag=dir0 \
+    --device virtio-blk,path=/Users/teuf/.crc/cache/crc_podman_vfkit_4.2.0_arm64/vz-test.img \
+    --device virtio-blk,path=/Users/teuf/Fedora-Server-netinst-x86_64-37-1.7.iso,deviceId=foobar \
+    --device virtio-rng \
+    --device virtio-net,unixSocketPath=/tmp/network.sock,mac=72:20:43:d4:38:62 \
+    --device virtio-vsock,listen,port=1024,socketURL=/Users/teuf/.crc/listen.sock \
+    --device virtio-vsock,connect,port=1234,socketURL=/Users/teuf/.crc/connect.sock \
+    --timesync vsockPort=1234
+
+
