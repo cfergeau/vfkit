@@ -1,0 +1,16 @@
+## Start vfkit with gvproxy
+
+term1> rm /Users/teuf/dev/vfkit/gvproxy.sock ; ./bin/gvproxy  --debug --listen unix:///tmp/gvproxy-http.sock --listen-vfkit unixgram:///Users/teuf/dev/vfkit/gvproxy.sock
+term2> rm /tmp/vfkit.sock ; sh ./contrib/scripts/start-crc-bundle.sh ~/.crc/cache/crc_podman_vfkit_4.4.1_arm64
+
+(vfkit is started with `--device virtio-net,unixSocketPath=gvproxy.sock,mac=5a:94:ef:e4:0c:ee`)
+
+
+## Start vfkit with the host listening on vsock port 3
+
+$ vfkit [...] --device virtio-vsock,port=3,socketURL=/Users/teuf/dev/vfkit/ign.sock,listen
+$  nc -l -U /Users/teuf/dev/vfkit/ign.sock
+in the guest:
+$ podman run --network=host -it --rm ubi9
+# yum install nmap-ncat
+# nc --vsock 2 3
