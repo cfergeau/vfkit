@@ -15,6 +15,7 @@ cp -c ${BUNDLE_PATH}/${DISKIMG} overlay.img
     --initrd "${BUNDLE_PATH}/${INITRD}" \
     --kernel-cmdline "${CMDLINE}" \
     --device virtio-blk,path=overlay.img \
-    --device virtio-serial,logFilePath=start-bundle.log \
+    --device virtio-serial,pty \
     --device virtio-net,nat,mac=72:20:43:d4:38:62 \
-    --device virtio-rng
+    --device virtio-rng \
+    --restful-uri unix:///Users/teuf/dev/vfkit/rest.sock
