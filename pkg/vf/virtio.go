@@ -91,7 +91,23 @@ func (dev *VirtioInput) AddToVirtualMachineConfig(vmConfig *vzVirtualMachineConf
 	return nil
 }
 
-func (dev *VirtioGPU) toVZ() (vz.GraphicsDeviceConfiguration, error) {
+func (dev *VirtioGPU) toMacVZ() (vz.GraphicsDeviceConfiguration, error) {
+	gpuDeviceConfig, err := vz.NewMacGraphicsDeviceConfiguration()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize graphics device: %w", err)
+	}
+	const ppi = 80
+	graphicsDisplayConfig, err := vz.NewMacGraphicsDisplayConfiguration(dev.Width, dev.Height, ppi)
+	if err != nil {
+		return nil, err
+	}
+	gpuDeviceConfig.SetDisplays(
+		graphicsDisplayConfig,
+	)
+	return gpuDeviceConfig, nil
+}
+
+func (dev *VirtioGPU) toVirtioVZ() (vz.GraphicsDeviceConfiguration, error) {
 	gpuDeviceConfig, err := vz.NewVirtioGraphicsDeviceConfiguration()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize virtio graphic device: %w", err)
@@ -105,6 +121,14 @@ func (dev *VirtioGPU) toVZ() (vz.GraphicsDeviceConfiguration, error) {
 	)
 
 	return gpuDeviceConfig, nil
+}
+
+func (dev *VirtioGPU) toVZ() (vz.GraphicsDeviceConfiguration, error) {
+	if dev.MacOS {
+		return dev.toMacVZ()
+	}
+
+	return dev.toVirtioVZ()
 }
 
 func (dev *VirtioGPU) AddToVirtualMachineConfig(vmConfig *vzVirtualMachineConfiguration) error {

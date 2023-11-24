@@ -39,6 +39,7 @@ type VirtioGPUResolution struct {
 // VirtioGPU configures a GPU device, such as the host computer's display
 type VirtioGPU struct {
 	UsesGUI bool `json:"usesGUI"`
+	MacOS   bool
 	VirtioGPUResolution
 }
 
@@ -279,6 +280,7 @@ func (dev *VirtioInput) FromOptions(options []option) error {
 func VirtioGPUNew() (VirtioDevice, error) {
 	return &VirtioGPU{
 		UsesGUI: false,
+		MacOS:   false,
 		VirtioGPUResolution: VirtioGPUResolution{
 			Width:  defaultVirtioGPUResolutionWidth,
 			Height: defaultVirtioGPUResolutionHeight,
@@ -298,8 +300,12 @@ func (dev *VirtioGPU) ToCmdLine() ([]string, error) {
 	if err := dev.validate(); err != nil {
 		return nil, err
 	}
+	cmdline := fmt.Sprintf("virtio-gpu,width=%d,height=%d", dev.Width, dev.Height)
+	if dev.MacOS {
+		cmdline = cmdline + ",macos"
+	}
 
-	return []string{"--device", fmt.Sprintf("virtio-gpu,width=%d,height=%d", dev.Width, dev.Height)}, nil
+	return []string{"--device", cmdline}, nil
 }
 
 func (dev *VirtioGPU) FromOptions(options []option) error {
@@ -319,6 +325,8 @@ func (dev *VirtioGPU) FromOptions(options []option) error {
 			}
 
 			dev.Width = width
+		case "macos":
+			dev.MacOS = true
 		default:
 			return fmt.Errorf("Unknown option for virtio-gpu devices: %s", option.key)
 		}
