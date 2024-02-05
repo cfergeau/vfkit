@@ -182,6 +182,8 @@ func (vm *VirtualMachine) UnmarshalJSON(b []byte) error {
 			}
 		case "timesync":
 			err = json.Unmarshal(*rawMsg, &vm.Timesync)
+		case "ignition":
+			err = json.Unmarshal(*rawMsg, &vm.Ignition)
 		case "devices":
 			var devices []VirtioDevice
 			devices, err = unmarshalDevices(*rawMsg)

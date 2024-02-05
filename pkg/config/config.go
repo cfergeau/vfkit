@@ -16,12 +16,20 @@ type VirtualMachine struct {
 	Bootloader  Bootloader     `json:"bootloader"`
 	Devices     []VirtioDevice `json:"devices,omitempty"`
 	Timesync    *TimeSync      `json:"timesync,omitempty"`
+	Ignition    *Ignition      `json:"ignition,omitempty"`
 }
 
 // TimeSync enables synchronization of the host time to the linux guest after the host was suspended.
 // This requires qemu-guest-agent to be running in the guest, and to be listening on a vsock socket
 type TimeSync struct {
 	VsockPort uint
+}
+
+// Ignition enables initial configuration of the guest if the disk image makes
+// use of [ignition](https://coreos.github.io/ignition/). The ignition configuration
+// is specified in the file located at Path
+type Ignition struct {
+	Path string
 }
 
 // The VMComponent interface represents a VM element (device, bootloader, ...)
@@ -165,6 +173,19 @@ func (vm *VirtualMachine) AddTimeSyncFromCmdLine(cmdlineOpts string) error {
 	return nil
 }
 
+func (vm *VirtualMachine) AddIgnitionFromCmdLine(cmdlineOpts string) error {
+	if cmdlineOpts == "" {
+		return nil
+	}
+	ign, err := ignitionFromCmdLine(cmdlineOpts)
+	if err != nil {
+		return err
+	}
+	vm.Ignition = ign
+
+	return nil
+}
+
 func (vm *VirtualMachine) TimeSync() *TimeSync {
 	return vm.Timesync
 }
@@ -215,4 +236,48 @@ func timesyncFromCmdLine(optsStr string) (*TimeSync, error) {
 	}
 
 	return &timesync, nil
+}
+
+func IgnitionNew(path string) (VMComponent, error) {
+	return &Ignition{
+		Path: path,
+	}, nil
+}
+
+func (ign *Ignition) ToCmdLine() ([]string, error) {
+	args := []string{}
+	if ign.Path != "" {
+		args = append(args, fmt.Sprintf("path=%s", ign.Path))
+	}
+	return []string{"--timesync", strings.Join(args, ",")}, nil
+}
+
+func (ign *Ignition) FromOptions(options []option) error {
+	for _, option := range options {
+		switch option.key {
+		case "path":
+			ign.Path = option.value
+		default:
+			return fmt.Errorf("unknown option for ignition parameter: %s", option.key)
+		}
+	}
+
+	if ign.Path == "" {
+		return fmt.Errorf("missing 'path' option for ignition parameter")
+	}
+
+	return nil
+}
+
+func ignitionFromCmdLine(optsStr string) (*Ignition, error) {
+	var ignition Ignition
+
+	optsStrv := strings.Split(optsStr, ",")
+	options := strvToOptions(optsStrv)
+
+	if err := ignition.FromOptions(options); err != nil {
+		return nil, err
+	}
+
+	return &ignition, nil
 }

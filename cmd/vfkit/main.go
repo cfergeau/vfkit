@@ -83,6 +83,10 @@ func newVMConfiguration(opts *cmdline.Options) (*config.VirtualMachine, error) {
 		return nil, err
 	}
 
+	if err := vmConfig.AddIgnitionFromCmdLine(opts.Ignition); err != nil {
+		return nil, err
+	}
+
 	if err := vmConfig.AddDevicesFromCmdLine(opts.Devices); err != nil {
 		return nil, err
 	}

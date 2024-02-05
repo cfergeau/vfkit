@@ -21,6 +21,16 @@ var jsonTests = map[string]jsonTest{
 		newVM:        newUEFIVM,
 		expectedJSON: `{"vcpus":3,"memoryBytes":4000000000,"bootloader":{"kind":"efiBootloader","EFIVariableStorePath":"/variable-store","CreateVariableStore":false}}`,
 	},
+	"TestIgnition": {
+		newVM: func(t *testing.T) *VirtualMachine {
+			vm := newLinuxVM(t)
+			ignition, err := IgnitionNew("/test/test.ign")
+			require.NoError(t, err)
+			vm.Ignition = ignition.(*Ignition)
+			return vm
+		},
+		expectedJSON: `{"vcpus":3,"memoryBytes":4000000000,"bootloader":{"kind":"linuxBootloader","VmlinuzPath":"/vmlinuz","KernelCmdLine":"/initrd","InitrdPath":"console=hvc0"},"ignition":{"Path":"/test/test.ign"}}`,
+	},
 	"TestTimeSync": {
 		newVM: func(t *testing.T) *VirtualMachine {
 			vm := newLinuxVM(t)
@@ -153,7 +163,6 @@ func TestJSON(t *testing.T) {
 				testInvalidJSON(t, &test)
 			})
 		}
-
 	})
 }
 
