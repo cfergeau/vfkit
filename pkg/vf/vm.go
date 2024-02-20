@@ -95,10 +95,16 @@ func (cfg *VirtualMachineConfiguration) Config() *config.VirtualMachine {
 
 func (cfg *VirtualMachineConfiguration) toVz() (*vz.VirtualMachineConfiguration, error) {
 	for _, dev := range cfg.config.Devices {
-		if err := AddToVirtualMachineConfig(cfg, dev); err != nil {
+		vfDev, err := configDevToVfDev(dev)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := vfDev.AddToVirtualMachineConfig(cfg); err != nil {
 			return nil, err
 		}
 	}
+
 	cfg.SetStorageDevicesVirtualMachineConfiguration(cfg.storageDevicesConfiguration)
 	cfg.SetDirectorySharingDevicesVirtualMachineConfiguration(cfg.directorySharingDevicesConfiguration)
 	cfg.SetPointingDevicesVirtualMachineConfiguration(cfg.pointingDevicesConfiguration)
@@ -114,8 +120,10 @@ func (cfg *VirtualMachineConfiguration) toVz() (*vz.VirtualMachineConfiguration,
 	if cfg.config.Timesync != nil && cfg.config.Timesync.VsockPort != 0 {
 		// automatically add the vsock device we'll need for communication over VsockPort
 		vsockDev := VirtioVsock{
-			Port:   cfg.config.Timesync.VsockPort,
-			Listen: false,
+			&config.VirtioVsock{
+				Port:   cfg.config.Timesync.VsockPort,
+				Listen: false,
+			},
 		}
 		if err := vsockDev.AddToVirtualMachineConfig(cfg); err != nil {
 			return nil, err

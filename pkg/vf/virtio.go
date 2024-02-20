@@ -14,15 +14,36 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type RosettaShare config.RosettaShare
-type NVMExpressController config.NVMExpressController
-type VirtioBlk config.VirtioBlk
-type VirtioFs config.VirtioFs
-type VirtioRng config.VirtioRng
-type VirtioSerial config.VirtioSerial
-type VirtioVsock config.VirtioVsock
-type VirtioInput config.VirtioInput
-type VirtioGPU config.VirtioGPU
+type (
+	RosettaShare struct {
+		*config.RosettaShare
+	}
+	NVMExpressController struct {
+		*config.NVMExpressController
+	}
+	VirtioBlk struct {
+		*config.VirtioBlk
+	}
+	VirtioFs struct {
+		*config.VirtioFs
+	}
+	VirtioRng struct {
+		*config.VirtioRng
+	}
+	VirtioSerial struct {
+		*config.VirtioSerial
+		ptyName string
+	}
+	VirtioVsock struct {
+		*config.VirtioVsock
+	}
+	VirtioInput struct {
+		*config.VirtioInput
+	}
+	VirtioGPU struct {
+		*config.VirtioGPU
+	}
+)
 
 func (dev *NVMExpressController) toVz() (vz.StorageDeviceConfiguration, error) {
 	var storageConfig StorageConfig = StorageConfig(dev.StorageConfig)
@@ -293,33 +314,37 @@ func (dev *VirtioVsock) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfig
 	return nil
 }
 
-func AddToVirtualMachineConfig(vmConfig *VirtualMachineConfiguration, dev config.VirtioDevice) error {
+type vfDevice interface {
+	config.VirtioDevice
+	AddToVirtualMachineConfig(vmConfig *VirtualMachineConfiguration) error
+}
+
+func configDevToVfDev(dev config.VirtioDevice) (vfDevice, error) {
 	switch d := dev.(type) {
 	case *config.USBMassStorage:
-		return (*USBMassStorage)(d).AddToVirtualMachineConfig(vmConfig)
+		return (*USBMassStorage)(d), nil
 	case *config.VirtioBlk:
-		return (*VirtioBlk)(d).AddToVirtualMachineConfig(vmConfig)
+		return &VirtioBlk{d}, nil
 	case *config.RosettaShare:
-		return (*RosettaShare)(d).AddToVirtualMachineConfig(vmConfig)
+		return &RosettaShare{d}, nil
 	case *config.NVMExpressController:
-		return (*NVMExpressController)(d).AddToVirtualMachineConfig(vmConfig)
+		return &NVMExpressController{d}, nil
 	case *config.VirtioFs:
-		return (*VirtioFs)(d).AddToVirtualMachineConfig(vmConfig)
+		return &VirtioFs{d}, nil
 	case *config.VirtioNet:
-		dev := VirtioNet{VirtioNet: d}
-		return dev.AddToVirtualMachineConfig(vmConfig)
+		return &VirtioNet{VirtioNet: d}, nil
 	case *config.VirtioRng:
-		return (*VirtioRng)(d).AddToVirtualMachineConfig(vmConfig)
+		return &VirtioRng{d}, nil
 	case *config.VirtioSerial:
-		return (*VirtioSerial)(d).AddToVirtualMachineConfig(vmConfig)
+		return &VirtioSerial{VirtioSerial: d}, nil
 	case *config.VirtioVsock:
-		return (*VirtioVsock)(d).AddToVirtualMachineConfig(vmConfig)
+		return &VirtioVsock{d}, nil
 	case *config.VirtioInput:
-		return (*VirtioInput)(d).AddToVirtualMachineConfig(vmConfig)
+		return &VirtioInput{d}, nil
 	case *config.VirtioGPU:
-		return (*VirtioGPU)(d).AddToVirtualMachineConfig(vmConfig)
+		return &VirtioGPU{d}, nil
 	default:
-		return fmt.Errorf("Unexpected virtio device type: %T", d)
+		return nil, fmt.Errorf("Unexpected virtio device type: %T", d)
 	}
 }
 
