@@ -94,6 +94,7 @@ func (cfg *VirtualMachineConfiguration) Config() *config.VirtualMachine {
 }
 
 func (cfg *VirtualMachineConfiguration) toVz() (*vz.VirtualMachineConfiguration, error) {
+	vfDevs := []config.VirtioDevice{}
 	for _, dev := range cfg.config.Devices {
 		vfDev, err := configDevToVfDev(dev)
 		if err != nil {
@@ -103,7 +104,10 @@ func (cfg *VirtualMachineConfiguration) toVz() (*vz.VirtualMachineConfiguration,
 		if err := vfDev.AddToVirtualMachineConfig(cfg); err != nil {
 			return nil, err
 		}
+		vfDevs = append(vfDevs, vfDev)
 	}
+
+	cfg.config.Devices = vfDevs
 
 	cfg.SetStorageDevicesVirtualMachineConfiguration(cfg.storageDevicesConfiguration)
 	cfg.SetDirectorySharingDevicesVirtualMachineConfiguration(cfg.directorySharingDevicesConfiguration)

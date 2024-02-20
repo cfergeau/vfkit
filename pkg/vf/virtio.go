@@ -32,7 +32,7 @@ type (
 	}
 	VirtioSerial struct {
 		*config.VirtioSerial
-		ptyName string
+		PtyName string `json:"ptyName,omitempty"`
 	}
 	VirtioVsock struct {
 		*config.VirtioVsock
