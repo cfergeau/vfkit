@@ -13,7 +13,7 @@ type VirtualMachine struct {
 }
 
 func NewVirtualMachine(vmConfig config.VirtualMachine) (*VirtualMachine, error) {
-	vfConfig, err := NewVirtualMachineConfiguration(&vmConfig)
+	vfConfig, err := NewVirtualMachineConfiguration(vmConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,16 @@ type VirtualMachineConfiguration struct {
 	socketDevicesConfiguration           []vz.SocketDeviceConfiguration
 }
 
-func NewVirtualMachineConfiguration(vmConfig *config.VirtualMachine) (*VirtualMachineConfiguration, error) {
+// `config.VirtualMachine` is passed by value as we want to differentiate
+// between command-line config.VirtualMachine and runtime config.VirtualMachine.
+// The list of `Devices` will be different between the 2, the runtime config uses
+// types defined in pkg/vf/ which wrap the types defined in pkg/config/.
+// The reason for this is that in some cases (virtio-serial pty code), we need
+// to augment the command line config with runtime information, which will be
+// exposed in the REST API.
+// If we change the `Devices` list in the command-line config, then this breaks
+// `VirtioVsockDevices()` as the types will no longer match.
+func NewVirtualMachineConfiguration(vmConfig config.VirtualMachine) (*VirtualMachineConfiguration, error) {
 	vzBootloader, err := toVzBootloader(vmConfig.Bootloader)
 	if err != nil {
 		return nil, err
@@ -76,7 +85,7 @@ func NewVirtualMachineConfiguration(vmConfig *config.VirtualMachine) (*VirtualMa
 
 	return &VirtualMachineConfiguration{
 		VirtualMachineConfiguration: vzVMConfig,
-		config:                      vmConfig,
+		config:                      &vmConfig,
 	}, nil
 }
 
