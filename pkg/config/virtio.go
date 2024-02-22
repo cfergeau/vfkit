@@ -183,13 +183,13 @@ func deviceFromCmdLine(deviceOpts string) (VirtioDevice, error) {
 // VirtioSerialNew creates a new serial device for the virtual machine. The
 // output the virtual machine sent to the serial port will be written to the
 // file at logFilePath.
-func VirtioSerialNew(logFilePath string) (VirtioDevice, error) {
+func VirtioSerialNew(logFilePath string) (*VirtioSerial, error) {
 	return &VirtioSerial{
 		LogFile: logFilePath,
 	}, nil
 }
 
-func VirtioSerialNewStdio() (VirtioDevice, error) {
+func VirtioSerialNewStdio() (*VirtioSerial, error) {
 	return &VirtioSerial{
 		UsesStdio: true,
 	}, nil
@@ -238,7 +238,7 @@ func (dev *VirtioSerial) FromOptions(options []option) error {
 // VirtioInputNew creates a new input device for the virtual machine.
 // The inputType parameter is the type of virtio-input device that will be added
 // to the machine.
-func VirtioInputNew(inputType string) (VirtioDevice, error) {
+func VirtioInputNew(inputType string) (*VirtioInput, error) {
 	dev := &VirtioInput{
 		InputType: inputType,
 	}
@@ -283,7 +283,7 @@ func (dev *VirtioInput) FromOptions(options []option) error {
 // VirtioGPUNew creates a new gpu device for the virtual machine.
 // The usesGUI parameter determines whether a graphical application window will
 // be displayed
-func VirtioGPUNew() (VirtioDevice, error) {
+func VirtioGPUNew() (*VirtioGPU, error) {
 	return &VirtioGPU{
 		UsesGUI: false,
 		VirtioGPUResolution: VirtioGPUResolution{
@@ -444,7 +444,7 @@ func (dev *VirtioNet) FromOptions(options []option) error {
 
 // VirtioRngNew creates a new random number generator device to feed entropy
 // into the virtual machine.
-func VirtioRngNew() (VirtioDevice, error) {
+func VirtioRngNew() (*VirtioRng, error) {
 	return &VirtioRng{}, nil
 }
 
@@ -531,7 +531,7 @@ func (dev *VirtioBlk) ToCmdLine() ([]string, error) {
 // vsock port, and on the host it will use the unix socket at socketURL.
 // When listen is true, the host will be listening for connections over vsock.
 // When listen  is false, the guest will be listening for connections over vsock.
-func VirtioVsockNew(port uint, socketURL string, listen bool) (VirtioDevice, error) {
+func VirtioVsockNew(port uint, socketURL string, listen bool) (*VirtioVsock, error) {
 	return &VirtioVsock{
 		Port:      port,
 		SocketURL: socketURL,
@@ -579,7 +579,7 @@ func (dev *VirtioVsock) FromOptions(options []option) error {
 // VirtioFsNew creates a new virtio-fs device for file sharing. It will share
 // the directory at sharedDir with the virtual machine. This directory can be
 // mounted in the VM using `mount -t virtiofs mountTag /some/dir`
-func VirtioFsNew(sharedDir string, mountTag string) (VirtioDevice, error) {
+func VirtioFsNew(sharedDir string, mountTag string) (*VirtioFs, error) {
 	return &VirtioFs{
 		DirectorySharingConfig: DirectorySharingConfig{
 			MountTag: mountTag,
@@ -617,7 +617,7 @@ func (dev *VirtioFs) FromOptions(options []option) error {
 // It will share a directory containing the linux rosetta binaries with the
 // virtual machine. This directory can be mounted in the VM using `mount -t
 // virtiofs mountTag /some/dir`
-func RosettaShareNew(mountTag string) (VirtioDevice, error) {
+func RosettaShareNew(mountTag string) (*RosettaShare, error) {
 	return &RosettaShare{
 		DirectorySharingConfig: DirectorySharingConfig{
 			MountTag: mountTag,
@@ -667,7 +667,7 @@ func usbMassStorageNewEmpty() *USBMassStorage {
 
 // USBMassStorageNew creates a new USB disk to use in the virtual machine. It will use
 // the file at imagePath as the disk image. This image must be in raw or ISO format.
-func USBMassStorageNew(imagePath string) (VMComponent, error) {
+func USBMassStorageNew(imagePath string) (*USBMassStorage, error) {
 	usbMassStorage := usbMassStorageNewEmpty()
 	usbMassStorage.ImagePath = imagePath
 

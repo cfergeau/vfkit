@@ -114,6 +114,8 @@ var jsonTests = map[string]jsonTest{
 	},
 	"TestAllVirtioDevices": {
 		newVM: func(t *testing.T) *VirtualMachine {
+			var dev VirtioDevice
+
 			vm := newLinuxVM(t)
 			// virtio-serial
 			dev, err := VirtioSerialNew("/virtioserial")

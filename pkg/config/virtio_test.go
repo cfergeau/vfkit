@@ -102,7 +102,7 @@ var virtioDevTests = map[string]virtioDevTest{
 		alternateCmdLine: []string{"--device", "virtio-vsock,socketURL=/foo/bar.unix,listen,port=1234"},
 	},
 	"NewVirtioRng": {
-		newDev:          VirtioRngNew,
+		newDev:          func() (VirtioDevice, error) { return VirtioRngNew() },
 		expectedDev:     &VirtioRng{},
 		expectedCmdLine: []string{"--device", "virtio-rng"},
 	},
@@ -114,7 +114,7 @@ var virtioDevTests = map[string]virtioDevTest{
 		expectedCmdLine: []string{"--device", "virtio-serial,logFilePath=/foo/bar.log"},
 	},
 	"NewVirtioSerialStdio": {
-		newDev: VirtioSerialNewStdio,
+		newDev: func() (VirtioDevice, error) { return VirtioSerialNewStdio() },
 		expectedDev: &VirtioSerial{
 			UsesStdio: true,
 		},
@@ -176,7 +176,7 @@ var virtioDevTests = map[string]virtioDevTest{
 		expectedCmdLine: []string{"--device", "virtio-input,keyboard"},
 	},
 	"NewVirtioGPUDevice": {
-		newDev: VirtioGPUNew,
+		newDev: func() (VirtioDevice, error) { return VirtioGPUNew() },
 		expectedDev: &VirtioGPU{
 			false,
 			VirtioGPUResolution{Width: 800, Height: 600},
@@ -189,7 +189,7 @@ var virtioDevTests = map[string]virtioDevTest{
 			if err != nil {
 				return nil, err
 			}
-			dev.(*VirtioGPU).VirtioGPUResolution = VirtioGPUResolution{Width: 1920, Height: 1080}
+			dev.VirtioGPUResolution = VirtioGPUResolution{Width: 1920, Height: 1080}
 			return dev, nil
 		},
 		expectedDev: &VirtioGPU{
