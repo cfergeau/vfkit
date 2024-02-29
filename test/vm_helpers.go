@@ -73,7 +73,7 @@ type vfkitRunner struct {
 }
 
 func startVfkit(t *testing.T, vm *config.VirtualMachine) *vfkitRunner {
-	const vfkitRelativePath = "../out/vfkit"
+	const vfkitRelativePath = "../bin/vfkit"
 
 	logFilePath := filepath.Join(t.TempDir(), fmt.Sprintf("%s.log", strings.ReplaceAll(t.Name(), "/", "")))
 	logFile, err := os.Create(logFilePath)

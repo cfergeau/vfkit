@@ -9,25 +9,25 @@ all: build
 TOOLS_DIR := tools
 include tools/tools.mk
 
-build: out/vfkit
+build: bin/vfkit
 
 test: build
 	@go test -v ./pkg/...
 	@go test -v -timeout 20m ./test
 
 clean:
-	rm -rf out
+	rm -rf bin
 
-out/vfkit-amd64 out/vfkit-arm64: out/vfkit-%: force-build
+bin/vfkit-amd64 bin/vfkit-arm64: bin/vfkit-%: force-build
 	@mkdir -p $(@D)
 	CGO_ENABLED=1 CGO_CFLAGS=$(CGO_CFLAGS) GOOS=darwin GOARCH=$* go build -ldflags "$(VERSION_LDFLAGS)" -o $@ ./cmd/vfkit
 	codesign -f --entitlements vf.entitlements -s - $@
 
-out/vfkit: out/vfkit-amd64 out/vfkit-arm64
+bin/vfkit: bin/vfkit-amd64 bin/vfkit-arm64
 	cd $(@D) && lipo -create $(^F) -output $(@F)
 
 # the go compiler is doing a good job at not rebuilding unchanged files
-# this phony target ensures out/vfkit-* are always considered out of date
+# this phony target ensures bin/vfkit-* are always considered out of date
 # and rebuilt. If the code was unchanged, go won't rebuild anything so that's
 # fast. Forcing the rebuild ensure we rebuild when needed, ie when the source code
 # changed, without adding explicit dependencies to the go files/go.mod
