@@ -93,7 +93,7 @@ func unmarshalDevices(rawMsg json.RawMessage) ([]VirtioDevice, error) {
 // serialized/unserialized in its expected format, instead of
 // '00:11:22:33:44:55', it's serialized as base64-encoded raw bytes such as
 // 'ABEiM0RV'. This custom (un)marshalling code will use the desired format.
-func unmarshalVirtioNet(rawMsg json.RawMessage) (*VirtioNet, error) {
+func unmarshalVirtioNet(rawMsg json.RawMessage) (VMComponent, error) {
 	var dev virtioNetForMarshalling
 
 	err := json.Unmarshal(rawMsg, &dev)
@@ -110,66 +110,41 @@ func unmarshalVirtioNet(rawMsg json.RawMessage) (*VirtioNet, error) {
 	return &dev.VirtioNet, nil
 }
 
-func unmarshalDevice(rawMsg json.RawMessage) (VirtioDevice, error) {
-	var (
-		kind jsonKind
-		dev  VirtioDevice
-		err  error
-	)
-	if err := json.Unmarshal(rawMsg, &kind); err != nil {
-		return nil, err
-	}
-	switch kind.Kind {
-	case vfNet:
-		dev, err = unmarshalVirtioNet(rawMsg)
-	case vfVsock:
-		var newDevice VirtioVsock
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case vfBlk:
-		var newDevice VirtioBlk
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case nvme:
-		var newDevice NVMExpressController
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case vfFs:
-		var newDevice VirtioFs
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case rosetta:
-		var newDevice RosettaShare
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case vfRng:
-		var newDevice VirtioRng
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case vfSerial:
-		var newDevice VirtioSerial
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case vfGpu:
-		var newDevice VirtioGPU
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case vfInput:
-		var newDevice VirtioInput
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	case usbMassStorage:
-		var newDevice USBMassStorage
-		err = json.Unmarshal(rawMsg, &newDevice)
-		dev = &newDevice
-	default:
-		err = fmt.Errorf("unknown 'kind' field: '%s'", kind)
-	}
-
-	if err != nil {
+func unmarshallVMComponent[V VMComponent](rawMsg json.RawMessage) (VMComponent, error) {
+	var dev V
+	if err := json.Unmarshal(rawMsg, &dev); err != nil {
 		return nil, err
 	}
 	return dev, nil
+}
+
+type deviceUnmarshaller func(rawMsg json.RawMessage) (VMComponent, error)
+
+func unmarshalDevice(rawMsg json.RawMessage) (VMComponent, error) {
+	var defaultUnmarshallers = map[vmComponentKind]deviceUnmarshaller{
+		vfNet:          unmarshalVirtioNet,
+		vfVsock:        unmarshallVMComponent[*VirtioVsock],
+		vfBlk:          unmarshallVMComponent[*VirtioBlk],
+		nvme:           unmarshallVMComponent[*NVMExpressController],
+		vfFs:           unmarshallVMComponent[*VirtioFs],
+		rosetta:        unmarshallVMComponent[*RosettaShare],
+		vfRng:          unmarshallVMComponent[*VirtioRng],
+		vfSerial:       unmarshallVMComponent[*VirtioSerial],
+		vfGpu:          unmarshallVMComponent[*VirtioGPU],
+		vfInput:        unmarshallVMComponent[*VirtioInput],
+		usbMassStorage: unmarshallVMComponent[*USBMassStorage],
+	}
+
+	var kind jsonKind
+	if err := json.Unmarshal(rawMsg, &kind); err != nil {
+		return nil, err
+	}
+	unmarshalFunc, ok := defaultUnmarshallers[kind.Kind]
+	if !ok {
+		return nil, fmt.Errorf("unknown 'kind' field: '%s'", kind)
+	}
+
+	return unmarshalFunc(rawMsg)
 }
 
 // UnmarshalJSON is a custom deserializer for VirtualMachine.  The custom work
