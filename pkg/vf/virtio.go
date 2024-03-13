@@ -338,8 +338,10 @@ func configDevToVfDev(dev config.VirtioDevice) (vfDevice, error) {
 		return &VirtioNet{VirtioNet: d}, nil
 	case *config.VirtioRng:
 		return &VirtioRng{d}, nil
+	case *config.RuntimeVirtioSerial:
+		return &VirtioSerial{RuntimeVirtioSerial: d}, nil
 	case *config.VirtioSerial:
-		return &VirtioSerial{VirtioSerial: d}, nil
+		return &VirtioSerial{RuntimeVirtioSerial: &config.RuntimeVirtioSerial{VirtioSerial: *d}}, nil
 	case *config.VirtioVsock:
 		return &VirtioVsock{d}, nil
 	case *config.VirtioInput:
