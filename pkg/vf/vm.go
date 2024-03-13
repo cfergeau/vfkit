@@ -46,7 +46,7 @@ func (vm *VirtualMachine) toVz() error {
 }
 
 func (vm *VirtualMachine) Config() *config.VirtualMachine {
-	return vm.vfConfig.config
+	return vm.vfConfig.Config()
 }
 
 type VirtualMachineConfiguration struct {
@@ -78,6 +78,10 @@ func NewVirtualMachineConfiguration(vmConfig *config.VirtualMachine) (*VirtualMa
 		VirtualMachineConfiguration: vzVMConfig,
 		config:                      vmConfig,
 	}, nil
+}
+
+func (cfg *VirtualMachineConfiguration) Config() *config.VirtualMachine {
+	return cfg.config
 }
 
 func (cfg *VirtualMachineConfiguration) toVz() (*vz.VirtualMachineConfiguration, error) {
