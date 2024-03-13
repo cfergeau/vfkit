@@ -67,7 +67,7 @@ func unmarshalBootloader(rawMsg json.RawMessage) (Bootloader, error) {
 	return bootloader, err
 }
 
-func unmarshalDevices(rawMsg json.RawMessage) ([]VirtioDevice, error) {
+func unmarshalDevices(rawMsg json.RawMessage, devUnmarshallers map[string]DeviceUnmarshaller) ([]VirtioDevice, error) {
 	var (
 		rawDevices []*json.RawMessage
 		devices    []VirtioDevice
@@ -79,7 +79,7 @@ func unmarshalDevices(rawMsg json.RawMessage) ([]VirtioDevice, error) {
 	}
 
 	for _, msg := range rawDevices {
-		dev, err := unmarshalDevice(*msg)
+		dev, err := unmarshalDevice(*msg, devUnmarshallers)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func unmarshalDevices(rawMsg json.RawMessage) ([]VirtioDevice, error) {
 	return devices, nil
 }
 
-// VirtioNet needs a custom unmarshaller as net.HardwareAddress is not
+// VirtioNet needs a custom DeviceUnmarshaller as net.HardwareAddress is not
 // serialized/unserialized in its expected format, instead of
 // '00:11:22:33:44:55', it's serialized as base64-encoded raw bytes such as
 // 'ABEiM0RV'. This custom (un)marshalling code will use the desired format.
@@ -118,10 +118,10 @@ func unmarshallVMComponent[V VMComponent](rawMsg json.RawMessage) (VMComponent, 
 	return dev, nil
 }
 
-type deviceUnmarshaller func(rawMsg json.RawMessage) (VMComponent, error)
+type DeviceUnmarshaller func(rawMsg json.RawMessage) (VMComponent, error)
 
-func unmarshalDevice(rawMsg json.RawMessage) (VMComponent, error) {
-	var defaultUnmarshallers = map[vmComponentKind]deviceUnmarshaller{
+func unmarshalDevice(rawMsg json.RawMessage, customUnmarshallers map[string]DeviceUnmarshaller) (VMComponent, error) {
+	var defaultUnmarshallers = map[vmComponentKind]DeviceUnmarshaller{
 		vfNet:          unmarshalVirtioNet,
 		vfVsock:        unmarshallVMComponent[*VirtioVsock],
 		vfBlk:          unmarshallVMComponent[*VirtioBlk],
@@ -139,18 +139,22 @@ func unmarshalDevice(rawMsg json.RawMessage) (VMComponent, error) {
 	if err := json.Unmarshal(rawMsg, &kind); err != nil {
 		return nil, err
 	}
-	unmarshalFunc, ok := defaultUnmarshallers[kind.Kind]
-	if !ok {
+
+	var unmarshalFunc DeviceUnmarshaller
+	if customUnmarshallers != nil {
+		unmarshalFunc = customUnmarshallers[string(kind.Kind)]
+	}
+	if unmarshalFunc == nil {
+		unmarshalFunc = defaultUnmarshallers[kind.Kind]
+	}
+	if unmarshalFunc == nil {
 		return nil, fmt.Errorf("unknown 'kind' field: '%s'", kind)
 	}
 
 	return unmarshalFunc(rawMsg)
 }
 
-// UnmarshalJSON is a custom deserializer for VirtualMachine.  The custom work
-// is needed because VirtualMachine uses interfaces in its struct and JSON cannot
-// determine which implementation of the interface to deserialize to.
-func (vm *VirtualMachine) UnmarshalJSON(b []byte) error {
+func (vm *VirtualMachine) UnmarshalJSONCustom(b []byte, devUnmarshallers map[string]DeviceUnmarshaller) error {
 	var (
 		err   error
 		input map[string]*json.RawMessage
@@ -179,7 +183,7 @@ func (vm *VirtualMachine) UnmarshalJSON(b []byte) error {
 			err = json.Unmarshal(*rawMsg, &vm.Timesync)
 		case "devices":
 			var devices []VirtioDevice
-			devices, err = unmarshalDevices(*rawMsg)
+			devices, err = unmarshalDevices(*rawMsg, devUnmarshallers)
 			if err == nil {
 				vm.Devices = devices
 			}
@@ -190,6 +194,13 @@ func (vm *VirtualMachine) UnmarshalJSON(b []byte) error {
 		}
 	}
 	return nil
+}
+
+// UnmarshalJSON is a custom deserializer for VirtualMachine.  The custom work
+// is needed because VirtualMachine uses interfaces in its struct and JSON cannot
+// determine which implementation of the interface to deserialize to.
+func (vm *VirtualMachine) UnmarshalJSON(b []byte) error {
+	return vm.UnmarshalJSONCustom(b, nil)
 }
 
 func (bootloader *EFIBootloader) MarshalJSON() ([]byte, error) {
