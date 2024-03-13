@@ -110,7 +110,23 @@ func unmarshalVirtioNet(rawMsg json.RawMessage) (VMComponent, error) {
 	return &dev.VirtioNet, nil
 }
 
-func unmarshallVMComponent[V VMComponent](rawMsg json.RawMessage) (VMComponent, error) {
+func unmarshalVirtioSerial(rawMsg json.RawMessage) (VMComponent, error) {
+	var dev RuntimeVirtioSerial
+	err := json.Unmarshal(rawMsg, &dev)
+	if err != nil {
+		return nil, err
+	}
+
+	// if ptyName is not set in JSON, return a *VirtioSerial instance
+	if dev.PtyName == "" {
+		return &dev.VirtioSerial, nil
+	}
+
+	// if ptyName is set in JSON, return a *RuntimeVirtioSerial instance
+	return &dev, nil
+}
+
+func unmarshalVMComponent[V VMComponent](rawMsg json.RawMessage) (VMComponent, error) {
 	var dev V
 	if err := json.Unmarshal(rawMsg, &dev); err != nil {
 		return nil, err
@@ -123,16 +139,16 @@ type DeviceUnmarshaller func(rawMsg json.RawMessage) (VMComponent, error)
 func unmarshalDevice(rawMsg json.RawMessage, customUnmarshallers map[string]DeviceUnmarshaller) (VMComponent, error) {
 	var defaultUnmarshallers = map[vmComponentKind]DeviceUnmarshaller{
 		vfNet:          unmarshalVirtioNet,
-		vfVsock:        unmarshallVMComponent[*VirtioVsock],
-		vfBlk:          unmarshallVMComponent[*VirtioBlk],
-		nvme:           unmarshallVMComponent[*NVMExpressController],
-		vfFs:           unmarshallVMComponent[*VirtioFs],
-		rosetta:        unmarshallVMComponent[*RosettaShare],
-		vfRng:          unmarshallVMComponent[*VirtioRng],
-		vfSerial:       unmarshallVMComponent[*VirtioSerial],
-		vfGpu:          unmarshallVMComponent[*VirtioGPU],
-		vfInput:        unmarshallVMComponent[*VirtioInput],
-		usbMassStorage: unmarshallVMComponent[*USBMassStorage],
+		vfVsock:        unmarshalVMComponent[*VirtioVsock],
+		vfBlk:          unmarshalVMComponent[*VirtioBlk],
+		nvme:           unmarshalVMComponent[*NVMExpressController],
+		vfFs:           unmarshalVMComponent[*VirtioFs],
+		rosetta:        unmarshalVMComponent[*RosettaShare],
+		vfRng:          unmarshalVMComponent[*VirtioRng],
+		vfSerial:       unmarshalVirtioSerial,
+		vfGpu:          unmarshalVMComponent[*VirtioGPU],
+		vfInput:        unmarshalVMComponent[*VirtioInput],
+		usbMassStorage: unmarshalVMComponent[*USBMassStorage],
 	}
 
 	var kind jsonKind
@@ -318,6 +334,17 @@ func (dev *VirtioSerial) MarshalJSON() ([]byte, error) {
 	return json.Marshal(devWithKind{
 		jsonKind:     kind(vfSerial),
 		VirtioSerial: *dev,
+	})
+}
+
+func (dev *RuntimeVirtioSerial) MarshalJSON() ([]byte, error) {
+	type devWithKind struct {
+		jsonKind
+		RuntimeVirtioSerial
+	}
+	return json.Marshal(devWithKind{
+		jsonKind:            kind(vfSerial),
+		RuntimeVirtioSerial: *dev,
 	})
 }
 

@@ -110,6 +110,11 @@ type VirtioSerial struct {
 	PtyName string `json:"ptyName,omitempty"`
 }
 
+type RuntimeVirtioSerial struct {
+	VirtioSerial
+	PtyName string `json:"ptyName,omitempty"`
+}
+
 // TODO: Add VirtioBalloon
 // https://github.com/Code-Hex/vz/blob/master/memory_balloon.go
 

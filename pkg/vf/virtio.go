@@ -31,8 +31,11 @@ type (
 		*config.VirtioRng
 	}
 	VirtioSerial struct {
-		*config.VirtioSerial
-		PtyName string `json:"ptyName,omitempty"`
+		*config.RuntimeVirtioSerial
+		/*
+			*config.VirtioSerial
+			PtyName string `json:"ptyName,omitempty"`
+		*/
 	}
 	VirtioVsock struct {
 		*config.VirtioVsock
