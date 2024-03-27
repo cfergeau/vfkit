@@ -60,6 +60,7 @@ type VirtualMachineConfiguration struct {
 	networkDevicesConfiguration          []*vz.VirtioNetworkDeviceConfiguration
 	entropyDevicesConfiguration          []*vz.VirtioEntropyDeviceConfiguration
 	serialPortsConfiguration             []*vz.VirtioConsoleDeviceSerialPortConfiguration
+	consolePortsConfiguration            []vz.ConsoleDeviceConfiguration
 	socketDevicesConfiguration           []vz.SocketDeviceConfiguration
 }
 
@@ -117,6 +118,9 @@ func (cfg *VirtualMachineConfiguration) toVz() (*vz.VirtualMachineConfiguration,
 	cfg.SetNetworkDevicesVirtualMachineConfiguration(cfg.networkDevicesConfiguration)
 	cfg.SetEntropyDevicesVirtualMachineConfiguration(cfg.entropyDevicesConfiguration)
 	cfg.SetSerialPortsVirtualMachineConfiguration(cfg.serialPortsConfiguration)
+	cfg.SetSerialPortsVirtualMachineConfiguration(cfg.serialPortsConfiguration)
+	cfg.SetConsoleDevicesVirtualMachineConfiguration(cfg.consolePortsConfiguration)
+
 	// len(cfg.socketDevicesConfiguration should be 0 or 1
 	// https://developer.apple.com/documentation/virtualization/vzvirtiosocketdeviceconfiguration?language=objc
 	cfg.SetSocketDevicesVirtualMachineConfiguration(cfg.socketDevicesConfiguration)

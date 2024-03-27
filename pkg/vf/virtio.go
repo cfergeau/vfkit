@@ -37,6 +37,13 @@ type (
 			PtyName string `json:"ptyName,omitempty"`
 		*/
 	}
+	VirtioConsole struct {
+		*config.RuntimeVirtioSerial
+		/*
+			*config.VirtioSerial
+			PtyName string `json:"ptyName,omitempty"`
+		*/
+	}
 	VirtioVsock struct {
 		*config.VirtioVsock
 	}
@@ -302,6 +309,77 @@ func (dev *VirtioSerial) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfi
 	return nil
 }
 
+func (dev *VirtioConsole) toVz() (*vz.VirtioConsoleDeviceConfiguration, error) {
+	var serialPortAttachment vz.SerialPortAttachment
+	var retErr error
+	switch {
+	/*
+		case dev.UsesStdio:
+			if err := setRawMode(os.Stdin); err != nil {
+				return nil, err
+			}
+			serialPortAttachment, retErr = vz.NewFileHandleSerialPortAttachment(os.Stdin, os.Stdout)
+	*/
+	case dev.UsesPty:
+		master, slave, err := termios.Pty()
+		if err != nil {
+			return nil, err
+		}
+		// as far as I can tell, we have no use for the slave fd in the
+		// vfkit process, the user will open minicom/screen/... /dev/ttys00?
+		// when needed
+		defer slave.Close()
+
+		// the master fd must stay open for vfkit's lifetime
+		gocleanup.Register(func() { _ = master.Close() })
+
+		dev.PtyName = slave.Name()
+
+		if err := setRawMode(master); err != nil {
+			return nil, err
+		}
+		serialPortAttachment, retErr = vz.NewFileHandleSerialPortAttachment(master, master)
+
+	default:
+		return nil, fmt.Errorf("invalid configuration")
+	}
+	if retErr != nil {
+		return nil, retErr
+	}
+
+	consoleConfig, err := vz.NewVirtioConsolePortConfiguration(
+		vz.WithVirtioConsolePortConfigurationAttachment(serialPortAttachment),
+		vz.WithVirtioConsolePortConfigurationIsConsole(true))
+	if err != nil {
+		return nil, err
+	}
+	deviceConfig, err := vz.NewVirtioConsoleDeviceConfiguration()
+	if err != nil {
+		return nil, err
+	}
+	deviceConfig.SetVirtioConsolePortConfiguration(0, consoleConfig)
+
+	return deviceConfig, nil
+
+}
+
+func (dev *VirtioConsole) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfiguration) error {
+	if dev.PtyName != "" {
+		return fmt.Errorf("VirtioSerial.PtyName must be empty (current value: %s)", dev.PtyName)
+	}
+
+	consoleConfig, err := dev.toVz()
+	if err != nil {
+		return err
+	}
+	if dev.UsesPty {
+		log.Infof("Using PTY (pty path: %s)", dev.PtyName)
+	}
+	vmConfig.consolePortsConfiguration = append(vmConfig.consolePortsConfiguration, consoleConfig)
+
+	return nil
+}
+
 func (dev *VirtioVsock) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfiguration) error {
 	if len(vmConfig.socketDevicesConfiguration) != 0 {
 		log.Debugf("virtio-vsock device already present, not adding a second one")
@@ -339,8 +417,14 @@ func configDevToVfDev(dev config.VirtioDevice) (vfDevice, error) {
 	case *config.VirtioRng:
 		return &VirtioRng{d}, nil
 	case *config.RuntimeVirtioSerial:
+		if d.UsesPty {
+			return &VirtioConsole{RuntimeVirtioSerial: d}, nil
+		}
 		return &VirtioSerial{RuntimeVirtioSerial: d}, nil
 	case *config.VirtioSerial:
+		if d.UsesPty {
+			return &VirtioConsole{RuntimeVirtioSerial: &config.RuntimeVirtioSerial{VirtioSerial: *d}}, nil
+		}
 		return &VirtioSerial{RuntimeVirtioSerial: &config.RuntimeVirtioSerial{VirtioSerial: *d}}, nil
 	case *config.VirtioVsock:
 		return &VirtioVsock{d}, nil
