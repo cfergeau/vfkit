@@ -232,6 +232,7 @@ func (dev *VirtioRng) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfigur
 }
 
 // https://developer.apple.com/documentation/virtualization/running_linux_in_a_virtual_machine?language=objc#:~:text=Configure%20the%20Serial%20Port%20Device%20for%20Standard%20In%20and%20Out
+/*
 func setRawMode(f *os.File) error {
 	var attr unix.Termios
 	err := termios.Tcgetattr(f.Fd(), &attr)
@@ -246,6 +247,54 @@ func setRawMode(f *os.File) error {
 
 	return termios.Tcsetattr(f.Fd(), termios.TCSANOW, &attr)
 }
+*/
+
+// Cfmakeraw modifies attr for raw mode.
+func Cfmakeraw(attr *unix.Termios) {
+	attr.Iflag &^= unix.BRKINT | unix.ICRNL | unix.INPCK | unix.ISTRIP | unix.IXON
+	attr.Oflag &^= unix.OPOST
+	attr.Cflag &^= unix.CSIZE | unix.PARENB
+	attr.Cflag |= unix.CS8
+	attr.Lflag &^= unix.ECHO | unix.ICANON | unix.IEXTEN | unix.ISIG
+	attr.Cc[unix.VMIN] = 1
+	attr.Cc[unix.VTIME] = 0
+}
+
+// Cfmakeraw modifies attr for raw mode.
+// from chardev/char-pty.c
+func qemuCfmakeraw(attr *unix.Termios) {
+	//termios_p->c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+
+	attr.Iflag &^= unix.IGNBRK | unix.BRKINT | unix.PARMRK | unix.INLCR | unix.IGNCR | unix.ICRNL | unix.ISTRIP | unix.IXON
+	//attr.Iflag &^= unix.INPCK
+	attr.Oflag &^= unix.OPOST
+	attr.Cflag &^= unix.CSIZE | unix.PARENB
+	attr.Cflag |= unix.CS8
+	attr.Lflag &^= unix.ECHO | unix.ECHONL | unix.ICANON | unix.IEXTEN | unix.ISIG
+	attr.Cc[unix.VMIN] = 1
+	attr.Cc[unix.VTIME] = 0
+}
+
+
+// Cfmakecbreak modifies attr for cbreak mode.
+func Cfmakecbreak(attr *unix.Termios) {
+	attr.Lflag &^= unix.ECHO | unix.ICANON
+	attr.Cc[unix.VMIN] = 1
+	attr.Cc[unix.VTIME] = 0
+}
+
+
+func setRawMode(f *os.File) error {
+	var attr unix.Termios
+	err := termios.Tcgetattr(f.Fd(), &attr)
+	if err != nil {
+		return err
+	}
+	qemuCfmakeraw(&attr)
+	attr.Oflag |= unix.OPOST
+	return termios.Tcsetattr(f.Fd(), termios.TCSANOW, &attr)
+}
+
 
 func (dev *VirtioSerial) toVz() (*vz.VirtioConsoleDeviceSerialPortConfiguration, error) {
 	var serialPortAttachment vz.SerialPortAttachment
@@ -271,7 +320,7 @@ func (dev *VirtioSerial) toVz() (*vz.VirtioConsoleDeviceSerialPortConfiguration,
 
 		dev.PtyName = slave.Name()
 
-		if err := setRawMode(master); err != nil {
+		if err := setRawMode(slave); err != nil {
 			return nil, err
 		}
 		serialPortAttachment, retErr = vz.NewFileHandleSerialPortAttachment(master, master)
