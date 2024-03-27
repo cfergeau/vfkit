@@ -359,6 +359,7 @@ func (dev *VirtioSerial) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfi
 }
 
 func (dev *VirtioConsole) toVz() (*vz.VirtioConsoleDeviceConfiguration, error) {
+	log.Infof("VirtioConsole.toVz")
 	var serialPortAttachment vz.SerialPortAttachment
 	var retErr error
 	switch {
@@ -408,11 +409,13 @@ func (dev *VirtioConsole) toVz() (*vz.VirtioConsoleDeviceConfiguration, error) {
 	}
 	deviceConfig.SetVirtioConsolePortConfiguration(0, consoleConfig)
 
+	log.Infof("created console device %s", dev.PtyName)
 	return deviceConfig, nil
 
 }
 
 func (dev *VirtioConsole) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfiguration) error {
+	log.Infof("VirtioConsole.AddToVirtualMachineConfig")
 	if dev.PtyName != "" {
 		return fmt.Errorf("VirtioSerial.PtyName must be empty (current value: %s)", dev.PtyName)
 	}
@@ -422,7 +425,7 @@ func (dev *VirtioConsole) AddToVirtualMachineConfig(vmConfig *VirtualMachineConf
 		return err
 	}
 	if dev.UsesPty {
-		log.Infof("Using PTY (pty path: %s)", dev.PtyName)
+		log.Infof("VirtioConsole: Using PTY (pty path: %s)", dev.PtyName)
 	}
 	vmConfig.consolePortsConfiguration = append(vmConfig.consolePortsConfiguration, consoleConfig)
 
@@ -466,11 +469,13 @@ func configDevToVfDev(dev config.VirtioDevice) (vfDevice, error) {
 	case *config.VirtioRng:
 		return &VirtioRng{d}, nil
 	case *config.RuntimeVirtioSerial:
+		log.Infof("RuntimeVirtioSerial: %+v", d)
 		if d.UsesPty {
 			return &VirtioConsole{RuntimeVirtioSerial: d}, nil
 		}
 		return &VirtioSerial{RuntimeVirtioSerial: d}, nil
 	case *config.VirtioSerial:
+		log.Infof("VirtioSerial: %+v", d)
 		if d.UsesPty {
 			return &VirtioConsole{RuntimeVirtioSerial: &config.RuntimeVirtioSerial{VirtioSerial: *d}}, nil
 		}
