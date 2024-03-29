@@ -253,12 +253,13 @@ This allows to connect to the export of the remote NBD server:
 The `--device virtio-net` option adds a network interface to the virtual machine. If it gets its IP address through DHCP, its IP can be found in `/var/db/dhcpd_leases` on the host.
 
 #### Arguments
+- `bridge`: bridge network interface name to attach the guest network interface to.
 - `mac`: optional argument to specify the MAC address of the VM. If it's omitted, a random MAC address will be used.
 - `fd`: file descriptor to attach to the guest network interface. The file descriptor must be a connected datagram socket. See [VZFileHandleNetworkDeviceAttachment](https://developer.apple.com/documentation/virtualization/vzfilehandlenetworkdeviceattachment?language=objc) for more details.
 - `nat`: guest network traffic will be NAT'ed through the host. This is the default. See [VZNATNetworkDeviceAttachment](https://developer.apple.com/documentation/virtualization/vznatnetworkdeviceattachment?language=objc) for more details.
 - `unixSocketPath`: path to a unix socket to attach to the guest network interface. See [VZFileHandleNetworkDeviceAttachment](https://developer.apple.com/documentation/virtualization/vzfilehandlenetworkdeviceattachment?language=objc) for more details.
 
-`fd`, `nat`, `unixSocketPath` are mutually exclusive.
+`bridge`, `fd`, `nat`, `unixSocketPath` are mutually exclusive.
 
 #### Example
 

@@ -106,6 +106,16 @@ func (dev *VirtioNet) connectUnixPath() error {
 	return nil
 }
 
+func ifaceByName(ifaceName string) (vz.BridgedNetwork, error) {
+
+	for _, iface := range vz.NetworkInterfaces() {
+		if iface.Identifier() == ifaceName {
+			return iface, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no '%s' network interface", ifaceName)
+}
 func (dev *VirtioNet) toVz() (*vz.VirtioNetworkDeviceConfiguration, error) {
 	var (
 		mac *vz.MACAddress
@@ -121,9 +131,16 @@ func (dev *VirtioNet) toVz() (*vz.VirtioNetworkDeviceConfiguration, error) {
 		return nil, err
 	}
 	var attachment vz.NetworkDeviceAttachment
-	if dev.Socket != nil {
+	switch {
+	case dev.Socket != nil:
 		attachment, err = vz.NewFileHandleNetworkDeviceAttachment(dev.Socket)
-	} else {
+	case dev.Bridge != "":
+		bridgeIface, lookupErr := ifaceByName(dev.Bridge)
+		if lookupErr != nil {
+			return nil, lookupErr
+		}
+		attachment, err = vz.NewBridgedNetworkDeviceAttachment(bridgeIface)
+	default:
 		attachment, err = vz.NewNATNetworkDeviceAttachment()
 	}
 	if err != nil {

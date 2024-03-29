@@ -89,9 +89,6 @@ type NVMExpressController struct {
 type VirtioRng struct {
 }
 
-// TODO: Add BridgedNetwork support
-// https://github.com/Code-Hex/vz/blob/d70a0533bf8ed0fa9ab22fa4d4ca554b7c3f3ce5/network.go#L81-L82
-
 // VirtioNet configures the virtual machine networking.
 type VirtioNet struct {
 	Nat        bool             `json:"nat"`
@@ -99,6 +96,7 @@ type VirtioNet struct {
 	// file parameter is holding a connected datagram socket.
 	// see https://github.com/Code-Hex/vz/blob/7f648b6fb9205d6f11792263d79876e3042c33ec/network.go#L113-L155
 	Socket *os.File `json:"socket,omitempty"`
+	Bridge string   `json:"bridge,omitempty"`
 
 	UnixSocketPath string `json:"unixSocketPath,omitempty"`
 }
@@ -391,17 +389,42 @@ func (dev *VirtioNet) SetUnixSocketPath(path string) {
 	dev.Nat = false
 }
 
-func (dev *VirtioNet) validate() error {
-	if dev.Nat && dev.Socket != nil {
+func (dev *VirtioNet) SetBridge(ifaceName string) {
+	dev.Bridge = ifaceName
+	dev.Nat = false
+}
+
+func (dev *VirtioNet) validateNat() error {
+	if dev.Socket != nil {
 		return fmt.Errorf("'nat' and 'fd' cannot be set at the same time")
 	}
-	if dev.Nat && dev.UnixSocketPath != "" {
+	if dev.UnixSocketPath != "" {
 		return fmt.Errorf("'nat' and 'unixSocketPath' cannot be set at the same time")
 	}
+	if dev.Bridge != "" {
+		return fmt.Errorf("'nat' and 'bridge' cannot be set at the same time")
+	}
+
+	return nil
+}
+
+func (dev *VirtioNet) validate() error {
+	if dev.Nat {
+		return dev.validateNat()
+	}
+
+	// dev.Nat is false
+
 	if dev.Socket != nil && dev.UnixSocketPath != "" {
 		return fmt.Errorf("'fd' and 'unixSocketPath' cannot be set at the same time")
 	}
-	if !dev.Nat && dev.Socket == nil && dev.UnixSocketPath == "" {
+	if dev.Socket != nil && dev.Bridge != "" {
+		return fmt.Errorf("'fd' and 'bridge' cannot be set at the same time")
+	}
+	if dev.UnixSocketPath != "" && dev.Bridge != "" {
+		return fmt.Errorf("'unixSocketPath' and 'bridge' cannot be set at the same time")
+	}
+	if dev.Socket == nil && dev.UnixSocketPath == "" && dev.Bridge == "" {
 		return fmt.Errorf("one of 'nat' or 'fd' or 'unixSocketPath' must be set")
 	}
 
@@ -420,6 +443,8 @@ func (dev *VirtioNet) ToCmdLine() ([]string, error) {
 		builder.WriteString(",nat")
 	case dev.UnixSocketPath != "":
 		fmt.Fprintf(&builder, ",unixSocketPath=%s", dev.UnixSocketPath)
+	case dev.Bridge != "":
+		fmt.Fprintf(&builder, ",bridge=%s", dev.Bridge)
 	default:
 		fmt.Fprintf(&builder, ",fd=%d", dev.Socket.Fd())
 	}
@@ -453,6 +478,8 @@ func (dev *VirtioNet) FromOptions(options []option) error {
 			dev.Socket = os.NewFile(uintptr(fd), "vfkit virtio-net socket")
 		case "unixSocketPath":
 			dev.UnixSocketPath = option.value
+		case "bridge":
+			dev.Bridge = option.value
 		default:
 			return fmt.Errorf("unknown option for virtio-net devices: %s", option.key)
 		}

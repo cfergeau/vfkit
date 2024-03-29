@@ -8,5 +8,14 @@
 	<true/>
 	<key>com.apple.security.virtualization</key>
 	<true/>
+<!--
+	This is required for \-\-device virtio-net,bridge=...
+	but Apple has to grant the right to use this entitlement.
+	If we set it on builds from git, the built binary is killed
+	right after startup.
+
+	<key>com.apple.vm.networking</key>
+	<true/>
+-->
 </dict>
 </plist>
