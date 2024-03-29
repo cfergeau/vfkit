@@ -2,6 +2,8 @@ github.com/Code-Hex/go-infinity-channel v1.0.0 h1:M8BWlfDOxq9or9yvF9+YkceoTkDI1p
 github.com/Code-Hex/go-infinity-channel v1.0.0/go.mod h1:5yUVg/Fqao9dAjcpzoQ33WwfdMWmISOrQloDRn3bsvY=
 github.com/Code-Hex/vz/v3 v3.1.0 h1:rcMIbZwPYwf78yXOhK68DZgYMdzxlrdmpDuM+NnGf1I=
 github.com/Code-Hex/vz/v3 v3.1.0/go.mod h1:xUfvg1VJ5A6ZQNuzQERwXJ7l2ZdTnY6eCy9CIS6/DYQ=
+github.com/Code-Hex/vz/v3 v3.1.1-0.20240124101259-c3198942b1b7 h1:9Siu3wK2Yu3K3YswU4KgslMGh/6fcbyffhzMRWqX7w4=
+github.com/Code-Hex/vz/v3 v3.1.1-0.20240124101259-c3198942b1b7/go.mod h1:WqWQuBbT4SbjO4C4GHG9m9HO8j5jecAmMh4eyVSEbEg=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/VividCortex/ewma v1.2.0 h1:f58SaIzcDXrSy3kWaHNvuJgJ3Nmz59Zji6XoJR/q1ow=

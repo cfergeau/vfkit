@@ -3,7 +3,7 @@ module github.com/crc-org/vfkit
 go 1.21.0
 
 require (
-	github.com/Code-Hex/vz/v3 v3.1.0
+	github.com/Code-Hex/vz/v3 v3.1.1-0.20240124101259-c3198942b1b7
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/containers/common v0.60.2
 	github.com/crc-org/crc/v2 v2.41.0
