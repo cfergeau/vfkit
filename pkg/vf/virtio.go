@@ -118,19 +118,44 @@ func (dev *VirtioInput) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfig
 }
 
 func (dev *VirtioGPU) toVz() (vz.GraphicsDeviceConfiguration, error) {
-	gpuDeviceConfig, err := vz.NewVirtioGraphicsDeviceConfiguration()
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize virtio graphic device: %w", err)
-	}
-	graphicsScanoutConfig, err := vz.NewVirtioGraphicsScanoutConfiguration(int64(dev.Width), int64(dev.Height))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create graphics scanout: %w", err)
-	}
-	gpuDeviceConfig.SetScanouts(
-		graphicsScanoutConfig,
-	)
+	const MacDisplayPixelsPerInch = int64(80) // Hardcoded since HiDPI scaling doesn't seem to work
 
-	return gpuDeviceConfig, nil
+	log.Debugf("Setting up graphics device with %vx%v resolution.", dev.Width, dev.Height)
+
+	if PlatformType == "macos" {
+		gpuDeviceConfig, err := vz.NewMacGraphicsDeviceConfiguration()
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize macOS graphics device: %w", err)
+		}
+		graphicsDisplayConfig, err := vz.NewMacGraphicsDisplayConfiguration(int64(dev.Width), int64(dev.Height), MacDisplayPixelsPerInch)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to create macOS graphics configuration: %w", err)
+		}
+
+		gpuDeviceConfig.SetDisplays(
+			graphicsDisplayConfig,
+		)
+
+		return gpuDeviceConfig, nil
+	} else {
+		gpuDeviceConfig, err := vz.NewVirtioGraphicsDeviceConfiguration()
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize virtio graphics device: %w", err)
+		}
+		graphicsScanoutConfig, err := vz.NewVirtioGraphicsScanoutConfiguration(int64(dev.Width), int64(dev.Height))
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to create graphics scanout: %w", err)
+		}
+
+		gpuDeviceConfig.SetScanouts(
+			graphicsScanoutConfig,
+		)
+
+		return gpuDeviceConfig, nil
+	}
+
 }
 
 func (dev *VirtioGPU) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfiguration) error {
@@ -199,7 +224,7 @@ func (dev *VirtioRng) AddToVirtualMachineConfig(vmConfig *VirtualMachineConfigur
 	return nil
 }
 
-// https://developer.apple.com/documentation/virtualization/running_linux_in_a_virtual_machine?language=objc#:~:text=Configure%20the%20Serial%20Port%20Device%20for%20Standard%20In%20and%20Out
+// https://developer.apple.com/documentation/virtualization/running_linux_in_a_virtual_machine#3880009
 func setRawMode(f *os.File) error {
 	// Get settings for terminal
 	attr, _ := unix.IoctlGetTermios(int(f.Fd()), unix.TIOCGETA)
@@ -328,6 +353,7 @@ func (dev *USBMassStorage) AddToVirtualMachineConfig(vmConfig *VirtualMachineCon
 	return nil
 }
 
+// Move these to top of file?
 type StorageConfig config.StorageConfig
 
 type USBMassStorage config.USBMassStorage

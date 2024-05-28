@@ -81,12 +81,22 @@ func toVzEFIBootloader(bootloader *config.EFIBootloader) (vz.BootLoader, error) 
 	)
 }
 
+func toVzMacOSBootloader(bootloader *config.MacOSBootloader) (vz.BootLoader, error) {
+	if runtime.GOARCH != "arm64" {
+		return nil, fmt.Errorf("macOS guests are only supported on ARM devices.")
+	}
+
+	return vz.NewMacOSBootLoader()
+}
+
 func toVzBootloader(bootloader config.Bootloader) (vz.BootLoader, error) {
 	switch b := bootloader.(type) {
 	case *config.LinuxBootloader:
 		return toVzLinuxBootloader(b)
 	case *config.EFIBootloader:
 		return toVzEFIBootloader(b)
+	case *config.MacOSBootloader:
+		return toVzMacOSBootloader(b)
 	default:
 		return nil, fmt.Errorf("Unexpected bootloader type: %T", b)
 	}
