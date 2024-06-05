@@ -35,6 +35,8 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
+      - name: go mod tidy
+        run: go mod tidy -v && git diff
       - name: Build
         run: make
       - name: Test
