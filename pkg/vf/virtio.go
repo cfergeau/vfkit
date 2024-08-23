@@ -340,6 +340,7 @@ func (dev *USBMassStorage) AddToVirtualMachineConfig(vmConfig *VirtualMachineCon
 	return nil
 }
 
+// Move these to top of file?
 type StorageConfig config.StorageConfig
 
 type USBMassStorage config.USBMassStorage
