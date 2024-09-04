@@ -2,6 +2,7 @@ package rest
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/crc-org/vfkit/pkg/rest/define"
 	"github.com/crc-org/vfkit/pkg/vf"
@@ -25,9 +26,9 @@ func (vm *VzVirtualMachine) Inspect(c *gin.Context) {
 
 // GetVMState retrieves the current vm state
 func (vm *VzVirtualMachine) GetVMState(c *gin.Context) {
-	current := vm.State()
+	current, _ := strings.CutPrefix(vm.State().String(), "VirtualMachineState")
 	c.JSON(http.StatusOK, gin.H{
-		"state":       current.String(),
+		"state":       current,
 		"canStart":    vm.CanStart(),
 		"canPause":    vm.CanPause(),
 		"canResume":   vm.CanResume(),
