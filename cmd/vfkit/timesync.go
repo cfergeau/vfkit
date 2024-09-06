@@ -35,6 +35,19 @@ func syncGuestTime(conn net.Conn) error {
 
 func watchWakeupNotifications(vm *vf.VirtualMachine, vsockPort uint32) {
 	var vsockConn net.Conn
+	for {
+		if vsockConn == nil {
+			var err error
+			vsockConn, err = vf.ConnectVsockSync(vm, vsockPort)
+			if err != nil {
+				log.Infof("error connecting to vsock port %d: %v", vsockPort, err)
+				time.Sleep(1 * time.Second)
+				continue
+			}
+		}
+		log.Infof("connected to vsock port %d", vsockPort)
+		break
+	}
 	defer func() {
 		if vsockConn != nil {
 			_ = vsockConn.Close()
