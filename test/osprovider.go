@@ -31,7 +31,8 @@ func kernelArch() string {
 }
 
 func downloadPuipui(destDir string) ([]string, error) {
-	const puipuiVersion = "0.0.1"
+	// https://github.com/Code-Hex/vz/pull/165 mentions puipui 1.0.3
+	const puipuiVersion = "1.0.3"
 	var puipuiURL = fmt.Sprintf("https://github.com/Code-Hex/puipui-linux/releases/download/v%s/puipui_linux_v%s_%s.tar.gz", puipuiVersion, puipuiVersion, kernelArch())
 
 	// https://github.com/cavaliergopher/grab/issues/104
