@@ -261,7 +261,7 @@ func setRawMode(f *os.File) error {
 	return termios.Tcsetattr(f.Fd(), termios.TCSANOW, &attr)
 }
 
-func (dev *VirtioSerial) toVz() (*vz.VirtioConsoleDeviceSerialPortConfiguration, error) {
+func (dev *VirtioSerial) toVz() (*vz.SerialPortConfiguration, error) {
 	var serialPortAttachment vz.SerialPortAttachment
 	var retErr error
 	switch {
@@ -277,7 +277,7 @@ func (dev *VirtioSerial) toVz() (*vz.VirtioConsoleDeviceSerialPortConfiguration,
 		return nil, retErr
 	}
 
-	return vz.NewVirtioConsoleDeviceSerialPortConfiguration(serialPortAttachment)
+	return vz.NewPL011SerialPortConfiguration(serialPortAttachment)
 }
 
 func (dev *VirtioSerial) toVzConsole() (*vz.VirtioConsolePortConfiguration, error) {
