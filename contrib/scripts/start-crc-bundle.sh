@@ -26,6 +26,6 @@ cp -c ${BUNDLE_PATH}/${DISKIMG} overlay.img
 ./out/vfkit --cpus 2 --memory 2048 \
     --bootloader efi,variable-store=efistore.nvram,create \
     --device virtio-blk,path=overlay.img \
-    --device virtio-serial,logFilePath=start-bundle.log \
+    --device virtio-serial,stdio
     --device virtio-net,nat,mac=72:20:43:d4:38:62 \
     --device virtio-rng

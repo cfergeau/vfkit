@@ -1,7 +1,5 @@
 github.com/Code-Hex/go-infinity-channel v1.0.0 h1:M8BWlfDOxq9or9yvF9+YkceoTkDI1pFAqvnP87Zh0Nw=
 github.com/Code-Hex/go-infinity-channel v1.0.0/go.mod h1:5yUVg/Fqao9dAjcpzoQ33WwfdMWmISOrQloDRn3bsvY=
-github.com/Code-Hex/vz/v3 v3.7.1 h1:EN1yNiyrbPq+dl388nne2NySo8I94EnPppvqypA65XM=
-github.com/Code-Hex/vz/v3 v3.7.1/go.mod h1:1LsW0jqW0r0cQ+IeR4hHbjdqOtSidNCVMWhStMHGho8=
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/VividCortex/ewma v1.2.0 h1:f58SaIzcDXrSy3kWaHNvuJgJ3Nmz59Zji6XoJR/q1ow=
@@ -13,6 +11,8 @@ github.com/bytedance/sonic/loader v0.1.1 h1:c+e5Pt1k/cy5wMveRDyk2X4B9hF4g7an8N3z
 github.com/bytedance/sonic/loader v0.1.1/go.mod h1:ncP89zfokxS5LZrJxl5z0UJcsk4M4yY2JpfqGeCtNLU=
 github.com/cavaliergopher/grab/v3 v3.0.1 h1:4z7TkBfmPjmLAAmkkAZNX/6QJ1nNFdv3SdIHXju0Fr4=
 github.com/cavaliergopher/grab/v3 v3.0.1/go.mod h1:1U/KNnD+Ft6JJiYoYBAimKH2XrYptb8Kl3DFGmsjpq4=
+github.com/cfergeau/vz/v3 v3.1.1-0.20250603104200-57832d5d13fa h1:IUPr2nMYBESiKB5TxzXevzwD98mlyxpPTwklB8L4AGA=
+github.com/cfergeau/vz/v3 v3.1.1-0.20250603104200-57832d5d13fa/go.mod h1:1LsW0jqW0r0cQ+IeR4hHbjdqOtSidNCVMWhStMHGho8=
 github.com/cheggaaa/pb/v3 v3.1.7 h1:2FsIW307kt7A/rz/ZI2lvPO+v3wKazzE4K/0LtTWsOI=
 github.com/cheggaaa/pb/v3 v3.1.7/go.mod h1:/Ji89zfVPeC/u5j8ukD0MBPHt2bzTYp74lQ7KlgFWTQ=
 github.com/cloudwego/base64x v0.1.4 h1:jwCgWpFanWmN8xoIUHa2rtzmkd5J2plF/dnLS6Xd/0Y=

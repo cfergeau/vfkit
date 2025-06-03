@@ -93,7 +93,7 @@ type VirtualMachineConfiguration struct {
 	graphicsDevicesConfiguration         []vz.GraphicsDeviceConfiguration
 	networkDevicesConfiguration          []*vz.VirtioNetworkDeviceConfiguration
 	entropyDevicesConfiguration          []*vz.VirtioEntropyDeviceConfiguration
-	serialPortsConfiguration             []*vz.VirtioConsoleDeviceSerialPortConfiguration
+	serialPortsConfiguration             []*vz.SerialPortConfiguration
 	socketDevicesConfiguration           []vz.SocketDeviceConfiguration
 	consolePortsConfiguration            []*vz.VirtioConsolePortConfiguration
 }

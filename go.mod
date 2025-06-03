@@ -73,3 +73,5 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/Code-Hex/vz/v3 => github.com/cfergeau/vz/v3 v3.1.1-0.20250603104200-57832d5d13fa
