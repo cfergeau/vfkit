@@ -46,7 +46,6 @@ jobs:
 
       - name: Install qemu-img
         run: |
-          brew update
           brew install qemu
 
       - name: Verify qemu-img is installed
