@@ -5,7 +5,6 @@ go 1.24.0
 require (
 	github.com/Code-Hex/vz/v3 v3.7.1
 	github.com/cavaliergopher/grab/v3 v3.0.1
-	github.com/containers/common v0.64.2
 	github.com/crc-org/crc/v2 v2.55.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/inetaf/tcpproxy v0.0.0-20250222171855-c4b9df066048
@@ -18,6 +17,7 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
+	go.podman.io/common v0.0.0-20250826054041-6e4bed3c9118
 	golang.org/x/crypto v0.42.0
 	golang.org/x/mod v0.28.0
 	golang.org/x/sys v0.37.0
@@ -31,6 +31,7 @@ require (
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.7 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
+	github.com/containers/common v0.64.2 // indirect
 	github.com/crc-org/machine v0.0.0-20240926103419-a943b47fd48b // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/ebitengine/purego v0.9.0 // indirect
