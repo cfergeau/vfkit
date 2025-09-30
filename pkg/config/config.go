@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/containers/common/pkg/strongunits"
-	log "github.com/sirupsen/logrus"
 )
 
 // VirtualMachine is the top-level type. It describes the virtual machine
@@ -44,7 +43,7 @@ type TimeSync struct {
 
 type Ignition struct {
 	ConfigPath string `json:"configPath"`
-	SocketPath string `json:"socketPath"` // unused, the path to the ignition socket is hardcoded
+	SocketPath string `json:"socketPath"`
 }
 
 // The VMComponent interface represents a VM element (device, bootloader, ...)
@@ -224,14 +223,12 @@ func (vm *VirtualMachine) TimeSync() *TimeSync {
 }
 
 func IgnitionNew(configPath string, socketPath string) (*Ignition, error) {
-	if configPath == "" {
+	if configPath == "" || socketPath == "" {
 		return nil, fmt.Errorf("config path and socket path cannot be empty")
-	}
-	if socketPath != "" {
-		log.Warnf("socketPath is deprecated and was ignored in previous release")
 	}
 	return &Ignition{
 		ConfigPath: configPath,
+		SocketPath: socketPath,
 	}, nil
 }
 
