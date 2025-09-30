@@ -16,7 +16,6 @@ import (
 	"math"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -44,6 +43,7 @@ type TimeSync struct {
 type Ignition struct {
 	ConfigPath string `json:"configPath"`
 	SocketPath string `json:"socketPath"`
+	VsockPort  uint32 `json:"vsockPort"`
 }
 
 // The VMComponent interface represents a VM element (device, bootloader, ...)
@@ -241,16 +241,14 @@ func (vm *VirtualMachine) AddIgnitionFileFromCmdLine(cmdlineOpts string) error {
 		return fmt.Errorf("ignition only accepts one option in command line argument")
 	}
 
-	socketPath := filepath.Join(os.TempDir(), ignitionSocketName)
-	dev, err := VirtioVsockNew(ignitionVsockPort, socketPath, true)
+	ignition, err := IgnitionNew(opts[0], "")
 	if err != nil {
 		return err
 	}
-	vm.Devices = append(vm.Devices, dev)
-	ignition, err := IgnitionNew(opts[0], socketPath)
-	if err != nil {
-		return err
+	if ignitionVsockPort > math.MaxUint32 {
+		return fmt.Errorf("invalid vsock port: %d", ignitionVsockPort)
 	}
+	ignition.VsockPort = uint32(ignitionVsockPort)
 	vm.Ignition = ignition
 	return nil
 }
