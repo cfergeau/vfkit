@@ -223,12 +223,11 @@ func (vm *VirtualMachine) TimeSync() *TimeSync {
 }
 
 func IgnitionNew(configPath string, socketPath string) (*Ignition, error) {
-	if configPath == "" || socketPath == "" {
-		return nil, fmt.Errorf("config path and socket path cannot be empty")
+	if configPath == "" {
+		return nil, fmt.Errorf("config path cannot be empty")
 	}
 	return &Ignition{
 		ConfigPath: configPath,
-		SocketPath: socketPath,
 	}, nil
 }
 
