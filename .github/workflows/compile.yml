@@ -37,6 +37,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup tmate session for macos-15-intel
+        if: matrix.runner == 'macos-15-intel'
+        uses: mxschmitt/action-tmate@v3 
+        with:
+          detached: true
+
       - name: >-
           WORKAROUND: Fetch tags that points to the revisions
           checked-out(actions/checkout#1467)
@@ -65,6 +71,11 @@ jobs:
       - name: Integration tests
         if: matrix.runner == 'macos-15-intel'
         run: make test-integration
+        continue-on-error: true
+      - name: Sleep for tmate session
+        if: matrix.runner == 'macos-15-intel'
+        run: sleep 3600s
+        continue-on-error: true
       - name: vet
         run: go vet ./...
       - name: Upload vfkit artifact
@@ -74,3 +85,4 @@ jobs:
           name: Unsigned vfkit Universal Binary
           path: "./out/vfkit"
           if-no-files-found: error
+
