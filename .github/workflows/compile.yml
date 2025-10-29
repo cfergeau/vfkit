@@ -61,7 +61,9 @@ jobs:
       # See:https://github.com/actions/runner-images/issues/13045
       - name: Integration tests
         if: matrix.runner == 'macos-15-intel'
-        run: make test-integration
+        run: |-
+          go test -v -timeout 20m -run TestSSHAccess/tcp ./test
+          make test-integration
         continue-on-error: true
 
       - name: Sleep for tmate session
