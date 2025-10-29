@@ -56,19 +56,19 @@ jobs:
       - name: Build
         run: make
 
+      - name: Workaround for network issue
+        if: matrix.runner == 'macos-15-intel'
+        run: |-
+          go test -v -timeout 20m -run TestSSHAccess/tcp ./test
+        continue-on-error: true
+
       # Integration tests run only on macos-15-intel due to virtualization requirements
       # macos-15-intel runners will be deprecated by August 2027
       # See:https://github.com/actions/runner-images/issues/13045
       - name: Integration tests
         if: matrix.runner == 'macos-15-intel'
         run: |-
-          go test -v -timeout 20m -run TestSSHAccess/tcp ./test
           make test-integration
-        continue-on-error: true
-
-      - name: Sleep for tmate session
-        if: matrix.runner == 'macos-15-intel'
-        run: sleep 3600s
         continue-on-error: true
 
       - name: Install qemu-img
