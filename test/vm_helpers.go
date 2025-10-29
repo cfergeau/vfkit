@@ -57,13 +57,13 @@ func retrySSHDial(errCh chan error, scheme string, address string, sshConfig *ss
 		case err := <-errCh:
 			return nil, err
 		case <-time.After(1 * time.Second):
-			log.Debugf("trying ssh dial")
+			log.Warnf("trying ssh dial")
 			sshClient, err = ssh.Dial(scheme, address, sshConfig)
 			if err == nil {
 				log.Infof("established SSH connection to %s over %s", address, scheme)
 				return sshClient, nil
 			}
-			log.Debugf("ssh failed: %v", err)
+			log.Warnf("ssh failed: %v", err)
 		case <-timeout:
 			return nil, fmt.Errorf("timeout waiting for SSH: %w", err)
 		}
