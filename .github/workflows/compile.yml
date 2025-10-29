@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
         with:
-          go-version: 'oldstable'
+          go-version-file: go.mod
       - name: golangci-lint
         run: make lint
   build:
@@ -37,12 +37,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup tmate session for macos-15-intel
-        if: matrix.runner == 'macos-15-intel'
-        uses: mxschmitt/action-tmate@v3 
-        with:
-          detached: true
-
       - name: >-
           WORKAROUND: Fetch tags that points to the revisions
           checked-out(actions/checkout#1467)
@@ -52,24 +46,9 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: 'oldstable'
+          go-version-file: go.mod
       - name: Build
         run: make
-
-      - name: Workaround for network issue
-        if: matrix.runner == 'macos-15-intel'
-        run: |-
-          go test -v -timeout 20m -run TestSSHAccess/tcp ./test
-        continue-on-error: true
-
-      # Integration tests run only on macos-15-intel due to virtualization requirements
-      # macos-15-intel runners will be deprecated by August 2027
-      # See:https://github.com/actions/runner-images/issues/13045
-      - name: Integration tests
-        if: matrix.runner == 'macos-15-intel'
-        run: |-
-          make test-integration
-        continue-on-error: true
 
       - name: Install qemu-img
         run: |
@@ -80,6 +59,12 @@ jobs:
       - name: Unit tests
         run: make test-unit
 
+      # Integration tests run only on macos-15-intel due to virtualization requirements
+      # macos-15-intel runners will be deprecated by August 2027
+      # See:https://github.com/actions/runner-images/issues/13045
+      - name: Integration tests
+        if: matrix.runner == 'macos-15-intel'
+        run: make test-integration
       - name: vet
         run: go vet ./...
       - name: Upload vfkit artifact
@@ -89,4 +74,3 @@ jobs:
           name: Unsigned vfkit Universal Binary
           path: "./out/vfkit"
           if-no-files-found: error
-

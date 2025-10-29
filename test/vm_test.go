@@ -38,7 +38,7 @@ func TestFailedVfkitStart(t *testing.T) {
 	vm.Start(t)
 
 	log.Infof("waiting for SSH")
-	_, err = retrySSHDial(t, vm.vfkitCmd.errCh, "unix", vm.vsockPath, vm.provider.SSHConfig())
+	_, err = retrySSHDial(vm.vfkitCmd.errCh, "unix", vm.vsockPath, vm.provider.SSHConfig())
 	require.Error(t, err)
 }
 
@@ -48,19 +48,10 @@ func testSSHAccess(t *testing.T, vm *testVM, network string) {
 	vm.Start(t)
 
 	log.Infof("waiting for SSH")
+	vm.WaitForSSH(t)
 
-	err := vm.WaitForSSH(t)
-	/*
-		err := vm.WaitForSSH(t)
-			if err != nil {
-				log.Infof("testSSHAccess - sleeping for a bit")
-				time.Sleep(60 * time.Second)
-			}
-	*/
 	log.Infof("shutting down VM")
-	if err != nil {
-		vm.Stop(t)
-	}
+	vm.Stop(t)
 }
 
 func TestSSHAccess(t *testing.T) {
