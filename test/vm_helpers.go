@@ -237,14 +237,15 @@ func (vm *testVM) Close(t *testing.T) {
 	vm.vfkitCmd.Close(t)
 }
 
-func (vm *testVM) WaitForSSH(t *testing.T) {
+func (vm *testVM) WaitForSSH(t *testing.T) error {
 	var (
 		sshClient *ssh.Client
 		err       error
 	)
 	switch vm.sshNetwork {
 	case "tcp":
-		ip, err := retryIPFromMAC(vm.vfkitCmd.errCh, vm.macAddress)
+		var ip string
+		ip, err = retryIPFromMAC(vm.vfkitCmd.errCh, vm.macAddress)
 		require.NoError(t, err)
 		sshClient, err = retrySSHDial(t, vm.vfkitCmd.errCh, "tcp", net.JoinHostPort(ip, strconv.FormatUint(uint64(vm.port), 10)), vm.provider.SSHConfig())
 		assert.NoError(t, err)
@@ -256,6 +257,7 @@ func (vm *testVM) WaitForSSH(t *testing.T) {
 	}
 
 	vm.sshClient = sshClient
+	return err
 }
 
 func (vm *testVM) SSHRun(t *testing.T, command string) {

@@ -17,7 +17,9 @@ test-unit:
 	@go test -v ./pkg/... ./cmd/vfkit/...
 
 test-integration: build
-	@go test -v -timeout 20m ./test
+	printenv
+	go test -v -timeout 20m -run TestSSHAccess/tcp ./test
+	go test -v -timeout 20m ./test
 
 clean:
 	rm -rf out
