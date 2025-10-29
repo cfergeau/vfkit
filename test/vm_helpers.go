@@ -16,6 +16,7 @@ import (
 
 	vfkithelpers "github.com/crc-org/crc/v2/pkg/drivers/vfkit"
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
 )
@@ -44,7 +45,7 @@ func retryIPFromMAC(errCh chan error, macAddress string) (string, error) {
 	}
 }
 
-func retrySSHDial(errCh chan error, scheme string, address string, sshConfig *ssh.ClientConfig) (*ssh.Client, error) {
+func retrySSHDial(t *testing.T, errCh chan error, scheme string, address string, sshConfig *ssh.ClientConfig) (*ssh.Client, error) {
 	var (
 		sshClient *ssh.Client
 		err       error
@@ -57,15 +58,15 @@ func retrySSHDial(errCh chan error, scheme string, address string, sshConfig *ss
 		case err := <-errCh:
 			return nil, err
 		case <-time.After(1 * time.Second):
-			log.Warnf("trying ssh dial")
+			log.Warnf("%s: trying ssh dial", t.Name())
 			sshClient, err = ssh.Dial(scheme, address, sshConfig)
 			if err == nil {
-				log.Infof("established SSH connection to %s over %s", address, scheme)
+				log.Infof("%s: established SSH connection to %s over %s", t.Name(), address, scheme)
 				return sshClient, nil
 			}
-			log.Warnf("ssh failed: %v", err)
+			log.Warnf("%s: ssh failed: %v", t.Name(), err)
 		case <-timeout:
-			return nil, fmt.Errorf("timeout waiting for SSH: %w", err)
+			return nil, fmt.Errorf("%s: timeout waiting for SSH: %w", t.Name(), err)
 		}
 	}
 }
@@ -128,12 +129,12 @@ func (cmd *vfkitRunner) Wait(t *testing.T) {
 	cmd.gracefullyShutdown = true
 }
 
-func (cmd *vfkitRunner) Close() {
+func (cmd *vfkitRunner) Close(t *testing.T) {
 	if cmd != nil && !cmd.gracefullyShutdown {
-		log.Infof("killing left-over vfkit process")
+		log.Infof("%s: killing left-over vfkit process", t.Name())
 		err := cmd.Process.Kill()
 		if err != nil {
-			log.Warnf("failed to kill vfkit process: %v", err)
+			log.Warnf("%s: failed to kill vfkit process: %v", t.Name(), err)
 		}
 	}
 }
@@ -229,11 +230,11 @@ func (vm *testVM) Stop(t *testing.T) {
 	vm.vfkitCmd.Wait(t)
 }
 
-func (vm *testVM) Close(_ *testing.T) {
+func (vm *testVM) Close(t *testing.T) {
 	if vm.sshClient != nil {
 		vm.sshClient.Close()
 	}
-	vm.vfkitCmd.Close()
+	vm.vfkitCmd.Close(t)
 }
 
 func (vm *testVM) WaitForSSH(t *testing.T) {
@@ -245,10 +246,10 @@ func (vm *testVM) WaitForSSH(t *testing.T) {
 	case "tcp":
 		ip, err := retryIPFromMAC(vm.vfkitCmd.errCh, vm.macAddress)
 		require.NoError(t, err)
-		sshClient, err = retrySSHDial(vm.vfkitCmd.errCh, "tcp", net.JoinHostPort(ip, strconv.FormatUint(uint64(vm.port), 10)), vm.provider.SSHConfig())
-		require.NoError(t, err)
+		sshClient, err = retrySSHDial(t, vm.vfkitCmd.errCh, "tcp", net.JoinHostPort(ip, strconv.FormatUint(uint64(vm.port), 10)), vm.provider.SSHConfig())
+		assert.NoError(t, err)
 	case "vsock":
-		sshClient, err = retrySSHDial(vm.vfkitCmd.errCh, "unix", vm.vsockPath, vm.provider.SSHConfig())
+		sshClient, err = retrySSHDial(t, vm.vfkitCmd.errCh, "unix", vm.vsockPath, vm.provider.SSHConfig())
 		require.NoError(t, err)
 	default:
 		t.FailNow()

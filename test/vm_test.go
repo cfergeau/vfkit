@@ -38,7 +38,7 @@ func TestFailedVfkitStart(t *testing.T) {
 	vm.Start(t)
 
 	log.Infof("waiting for SSH")
-	_, err = retrySSHDial(vm.vfkitCmd.errCh, "unix", vm.vsockPath, vm.provider.SSHConfig())
+	_, err = retrySSHDial(t, vm.vfkitCmd.errCh, "unix", vm.vsockPath, vm.provider.SSHConfig())
 	require.Error(t, err)
 }
 
