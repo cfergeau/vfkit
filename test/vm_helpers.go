@@ -16,7 +16,6 @@ import (
 
 	vfkithelpers "github.com/crc-org/crc/v2/pkg/drivers/vfkit"
 	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
 )
@@ -248,7 +247,7 @@ func (vm *testVM) WaitForSSH(t *testing.T) error {
 		ip, err = retryIPFromMAC(vm.vfkitCmd.errCh, vm.macAddress)
 		require.NoError(t, err)
 		sshClient, err = retrySSHDial(t, vm.vfkitCmd.errCh, "tcp", net.JoinHostPort(ip, strconv.FormatUint(uint64(vm.port), 10)), vm.provider.SSHConfig())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	case "vsock":
 		sshClient, err = retrySSHDial(t, vm.vfkitCmd.errCh, "unix", vm.vsockPath, vm.provider.SSHConfig())
 		require.NoError(t, err)

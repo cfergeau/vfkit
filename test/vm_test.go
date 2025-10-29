@@ -49,7 +49,7 @@ func testSSHAccess(t *testing.T, vm *testVM, network string) {
 
 	log.Infof("waiting for SSH")
 
-	_ = vm.WaitForSSH(t)
+	err := vm.WaitForSSH(t)
 	/*
 		err := vm.WaitForSSH(t)
 			if err != nil {
@@ -58,7 +58,9 @@ func testSSHAccess(t *testing.T, vm *testVM, network string) {
 			}
 	*/
 	log.Infof("shutting down VM")
-	vm.Stop(t)
+	if err != nil {
+		vm.Stop(t)
+	}
 }
 
 func TestSSHAccess(t *testing.T) {
