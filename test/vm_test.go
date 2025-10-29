@@ -50,7 +50,7 @@ func testSSHAccess(t *testing.T, vm *testVM, network string) {
 	log.Infof("waiting for SSH")
 	err := vm.WaitForSSH(t)
 
-	if err == nil {
+	if err != nil {
 		log.Infof("testSSHAccess - sleeping for a bit")
 		time.Sleep(60 * time.Second)
 	}
