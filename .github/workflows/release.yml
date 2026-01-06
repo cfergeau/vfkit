@@ -1,0 +1,47 @@
+name: Release build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+
+    - name: >-
+        WORKAROUND: Fetch tags that points to the revisions
+        checked-out(actions/checkout#1467)
+      run: |-
+        git fetch --tags --force
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: 'stable'
+
+    - name: Build
+      run: |
+        make
+
+    - uses: actions/upload-artifact@v5
+      with:
+        name: vfkit unsigned binary
+        path: out/vfkit
+
+    - name: Create release on github
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          gh release create --draft --generate-notes --verify-tag ${{github.ref_name}}
+          cd bin
+          sha256sum * >> sha256sums
+          gh release upload ${{github.ref_name}} *
