@@ -3,7 +3,7 @@ package rest
 import (
 	"fmt"
 
-	"github.com/crc-org/vfkit/pkg/rest/define"
+	"github.com/cfergeau/vfkit/pkg/rest/define"
 	"github.com/sirupsen/logrus"
 )
 

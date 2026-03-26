@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/crc-org/vfkit/pkg/config"
-	"github.com/crc-org/vfkit/pkg/util"
+	"github.com/cfergeau/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/util"
 	"golang.org/x/sys/unix"
 
 	"github.com/Code-Hex/vz/v3"

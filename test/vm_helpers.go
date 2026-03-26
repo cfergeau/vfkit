@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/crc-org/vfkit/pkg/config"
-	"github.com/crc-org/vfkit/pkg/rest"
+	"github.com/cfergeau/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/rest"
 
 	vfkithelpers "github.com/crc-org/crc/v2/pkg/drivers/vfkit"
 	log "github.com/sirupsen/logrus"

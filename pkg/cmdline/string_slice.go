@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crc-org/vfkit/pkg/util"
+	"github.com/cfergeau/vfkit/pkg/util"
 )
 
 // -- stringSlice Value

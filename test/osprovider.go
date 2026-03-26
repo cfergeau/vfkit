@@ -11,7 +11,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/crc-org/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/config"
 	"github.com/xi2/xz"
 
 	"github.com/cavaliergopher/grab/v3"

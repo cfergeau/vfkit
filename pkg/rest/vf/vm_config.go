@@ -3,8 +3,8 @@ package rest
 import (
 	"net/http"
 
-	"github.com/crc-org/vfkit/pkg/rest/define"
-	"github.com/crc-org/vfkit/pkg/vf"
+	"github.com/cfergeau/vfkit/pkg/rest/define"
+	"github.com/cfergeau/vfkit/pkg/vf"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

@@ -7,7 +7,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/crc-org/vfkit/pkg/util"
+	"github.com/cfergeau/vfkit/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

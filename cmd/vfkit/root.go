@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/crc-org/vfkit/pkg/cmdline"
-	"github.com/crc-org/vfkit/pkg/util"
+	"github.com/cfergeau/vfkit/pkg/cmdline"
+	"github.com/cfergeau/vfkit/pkg/util"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -16,7 +16,7 @@ var rootCmd = &cobra.Command{
 	Use:   "vfkit",
 	Short: "vfkit is a simple hypervisor using Apple's Virtualization framework",
 	Long: `A hypervisor written in Go using Apple's Virtualization framework to run virtual machines.
-                Complete documentation is available at https://github.com/crc-org/vfkit`,
+                Complete documentation is available at https://github.com/cfergeau/vfkit`,
 	RunE: func(_ *cobra.Command, _ []string) error {
 		if len(opts.LogLevel) > 0 {
 			ll, err := getLogLevel()

@@ -24,6 +24,8 @@ github.com/crc-org/crc/v2 v2.59.0 h1:dgdjaQkfldvjo9FTclVnFWJl38E/gKKWZrFXCvHXr7g
 github.com/crc-org/crc/v2 v2.59.0/go.mod h1:XXi41qqnvipav+QkH4YYn4Of11lyccvD67QiRBIG6YE=
 github.com/crc-org/machine v0.0.0-20240926103419-a943b47fd48b h1:5577tKzQcPfd/i0dCekY32R9DUi677sNfhVLYKulBGM=
 github.com/crc-org/machine v0.0.0-20240926103419-a943b47fd48b/go.mod h1:trWeQimjfE3dJ8qWOxI4ePtYm13aecK42bf01s6h/Nc=
+github.com/crc-org/vfkit v0.6.3 h1:X6pHxDWx0jQRV6TpzCmI4tfPyW/2R03HEEiS5vNnsBU=
+github.com/crc-org/vfkit v0.6.3/go.mod h1:jp0CkOQW5BAvSdJSV7OHUuTGRUo7+/fwaFHd+92pqR8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=

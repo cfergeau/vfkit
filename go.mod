@@ -1,4 +1,4 @@
-module github.com/crc-org/vfkit
+module github.com/cfergeau/vfkit
 
 go 1.25.0
 
@@ -32,6 +32,7 @@ require (
 	github.com/cheggaaa/pb/v3 v3.1.7 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/crc-org/machine v0.0.0-20240926103419-a943b47fd48b // indirect
+	github.com/crc-org/vfkit v0.6.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect

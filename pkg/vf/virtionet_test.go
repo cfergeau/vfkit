@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/crc-org/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/config"
 	"github.com/stretchr/testify/require"
 )
 

@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/crc-org/vfkit/pkg/config"
-	"github.com/crc-org/vfkit/pkg/vf"
+	"github.com/cfergeau/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/vf"
 	sleepnotifier "github.com/prashantgupta24/mac-sleep-notifier/notifier"
 	log "github.com/sirupsen/logrus"
 )

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/crc-org/vfkit/pkg/cmdline"
-	"github.com/crc-org/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/cmdline"
+	"github.com/cfergeau/vfkit/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

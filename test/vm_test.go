@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/crc-org/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/config"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"

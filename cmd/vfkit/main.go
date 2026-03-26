@@ -32,16 +32,16 @@ import (
 	"time"
 
 	"github.com/Code-Hex/vz/v3"
-	"github.com/crc-org/vfkit/pkg/cmdline"
-	"github.com/crc-org/vfkit/pkg/config"
-	"github.com/crc-org/vfkit/pkg/process"
-	"github.com/crc-org/vfkit/pkg/rest"
-	restvf "github.com/crc-org/vfkit/pkg/rest/vf"
-	"github.com/crc-org/vfkit/pkg/vf"
+	"github.com/cfergeau/vfkit/pkg/cmdline"
+	"github.com/cfergeau/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/process"
+	"github.com/cfergeau/vfkit/pkg/rest"
+	restvf "github.com/cfergeau/vfkit/pkg/rest/vf"
+	"github.com/cfergeau/vfkit/pkg/vf"
 	"github.com/kdomanski/iso9660"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/crc-org/vfkit/pkg/util"
+	"github.com/cfergeau/vfkit/pkg/util"
 )
 
 func newLegacyBootloader(opts *cmdline.Options) config.Bootloader {

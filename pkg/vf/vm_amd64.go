@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Code-Hex/vz/v3"
-	"github.com/crc-org/vfkit/pkg/config"
+	"github.com/cfergeau/vfkit/pkg/config"
 )
 
 func NewMacPlatformConfiguration(_, _, _ string) (vz.PlatformConfiguration, error) {
