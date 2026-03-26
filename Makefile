@@ -1,8 +1,6 @@
 .PHONY: all build clean test test-unit test-integration
 
-GIT_VERSION ?= $(shell git describe --always --dirty)
 CGO_CFLAGS=-mmacosx-version-min=13.0
-VERSION_LDFLAGS=-X github.com/crc-org/vfkit/pkg/cmdline.gitVersion=$(GIT_VERSION)
 
 all: build
 
@@ -24,7 +22,7 @@ clean:
 
 out/vfkit-amd64 out/vfkit-arm64: out/vfkit-%: force-build
 	@mkdir -p $(@D)
-	CGO_ENABLED=1 CGO_CFLAGS=$(CGO_CFLAGS) GOOS=darwin GOARCH=$* go build -ldflags "$(VERSION_LDFLAGS)" -o $@ ./cmd/vfkit
+	CGO_ENABLED=1 CGO_CFLAGS=$(CGO_CFLAGS) GOOS=darwin GOARCH=$* go build -o $@ ./cmd/vfkit
 	codesign -f --entitlements vf.entitlements -s - $@
 
 out/vfkit: out/vfkit-amd64 out/vfkit-arm64
