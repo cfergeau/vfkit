@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/crc-org/vfkit/pkg/config"
 	"github.com/xi2/xz"
@@ -239,8 +240,9 @@ func (fedora *FedoraProvider) ToVirtualMachine() (*config.VirtualMachine, error)
 
 func (puipui *PuiPuiProvider) SSHConfig() *ssh.ClientConfig {
 	return &ssh.ClientConfig{
-		User: "root",
-		Auth: []ssh.AuthMethod{ssh.Password("passwd")},
+		User:    "root",
+		Auth:    []ssh.AuthMethod{ssh.Password("passwd")},
+		Timeout: 2 * time.Second,
 		// #nosec 106 -- the host SSH key of the VM will change each time it boots
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
@@ -261,8 +263,9 @@ func (puipui *PuiPuiProvider) SSHAccessMethods() []SSHAccessMethod {
 
 func (fedora *FedoraProvider) SSHConfig() *ssh.ClientConfig {
 	return &ssh.ClientConfig{
-		User: "vfkituser",
-		Auth: []ssh.AuthMethod{ssh.Password("vfkittest")},
+		User:    "vfkituser",
+		Auth:    []ssh.AuthMethod{ssh.Password("vfkittest")},
+		Timeout: 2 * time.Second,
 		// #nosec 106 -- the host SSH key of the VM will change each time it boots
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
